@@ -23,7 +23,7 @@ fnames = dir("Helper_Functions/")
 for(f in fnames){
   source(paste0("Helper_Functions/",f))
 }
-source(file = './CoDA-Penalized-Regression/R/functions_coda_penalized_regression.R')
+source(file = 'CODA_Functions/functions_coda_penalized_regression.R')
 
 
 
@@ -147,16 +147,6 @@ for(taxa_level in c("species")){
 df = level.list$species
 df = df[!is.na(df$Status),]
 mxSparsePercent = .9
-
-# md.df = data.frame()
-# host = unique(md$subject_id)
-# for (i in host) {
-#   ph = md %>% 
-#     filter(subject_id==i)
-#   md.df = rbind(md.df,ph[1,])
-# }
-# table(df$Status)
-# df = df[rownames(df)%in%md.df$sampleID,]
 
 
 benchmark = data.frame()
