@@ -13,15 +13,15 @@ inner_perf = data.frame()
 
 ensemble = c("ranger","pls","svmRadial","glmnet","rangerE")
 ensemble = c("ranger","xgbTree","xgbLinear")
+max_sparsity = .9
 
-sd = 20991
-for(sd in 1:1){
-  set.seed(sd)
+for(sd1 in 1:1){
+  set.seed(sd1)
   k_fold = 2
   overll_folds = caret::createFolds(ttData$y_train,k = k_fold,list = F)
   innerfold_data = lodo_partition(data.frame(Status = ttData$y_train,ttData$train_Data),
                                   dataset_labels = overll_folds,
-                                  sd)
+                                  sd1)
   
   
   ## Get within fold cross validated performance 
@@ -60,7 +60,7 @@ for(sd in 1:1){
                                         testx = testx,
                                         dcv = cc.dcv$lrs,lrs.train = lrs.train,lrs.test = lrs.test,
                                         y_label = innerFold$y_train,
-                                        seed = sd,
+                                        seed = sd1,
                                         ensemble = ensemble,
                                         y_test = innerFold$y_test,
                                         tarFeatures = tar_Features,
@@ -68,7 +68,7 @@ for(sd in 1:1){
                                         max_sparsity = max_sparsity
         )
         
-        perf = data.frame(Seed = sd,Fold = f,tar_Features ,tar_dcvInner$Performance)
+        perf = data.frame(Seed = sd1,Fold = f,tar_Features ,tar_dcvInner$Performance)
         inner_perf = rbind(inner_perf,perf)
       }))
       
