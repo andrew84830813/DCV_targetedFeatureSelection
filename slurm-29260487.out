@@ -1,0 +1,417 @@
+Loading required package: lattice
+Loading required package: ggplot2
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Welcome to compositions, a package for compositional data analysis.
+Find an intro with "? compositions"
+
+
+Attaching package: ‘compositions’
+
+The following object is masked from ‘package:caret’:
+
+    R2
+
+The following objects are masked from ‘package:stats’:
+
+    cor, cov, dist, var
+
+The following objects are masked from ‘package:base’:
+
+    %*%, norm, scale, scale.default
+
+Loading required package: Matrix
+
+Attaching package: ‘Matrix’
+
+The following objects are masked from ‘package:tidyr’:
+
+    expand, pack, unpack
+
+Loaded glmnet 4.1-1
+
+Attaching package: ‘glmnet’
+
+The following object is masked from ‘package:compositions’:
+
+    rmult
+
+Fold-5 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    60     42     27 
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    30     21     14 
+51
+101
+151
+201
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    30     21     13 
+51
+101
+151
+201
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores UC_CD-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(3 of 3)
+Fold 1 of 1
+Perform DCV Log Ratio Selection - (Step 1 of 4)
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores UC_CD-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(3 of 3)
+Fold 1 of 1
+Compute number of distinct parts
+Train Ridge Regression Model - (Step 2 of 4)
+Train Ensemble Model - (Step 3 of 4)
+ranger1
+pls2
+svmRadial3
+glmnet4
+rangerE5
+Train RFE Model - (Step 4 of 4)
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    56     38     26 
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+22
+44
+65
+86
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+22
+44
+65
+86
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Perform DCV Log Ratio Selection - (Step 1 of 4)
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Compute number of distinct parts
+Train Ridge Regression Model - (Step 2 of 4)
+Train Ensemble Model - (Step 3 of 4)
+ranger1
+pls2
+svmRadial3
+glmnet4
+rangerE5
+Train RFE Model - (Step 4 of 4)
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    56     38     26 
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+34
+66
+98
+131
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+34
+66
+98
+131
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Perform DCV Log Ratio Selection - (Step 1 of 4)
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Compute number of distinct parts
+Train Ridge Regression Model - (Step 2 of 4)
+Train Ensemble Model - (Step 3 of 4)
+ranger1
+pls2
+svmRadial3
+glmnet4
+rangerE5
+Train RFE Model - (Step 4 of 4)
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    56     38     26 
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+68
+136
+204
+271
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+68
+136
+204
+271
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Perform DCV Log Ratio Selection - (Step 1 of 4)
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Compute number of distinct parts
+Train Ridge Regression Model - (Step 2 of 4)
+Train Ensemble Model - (Step 3 of 4)
+ranger1
+pls2
+svmRadial3
+glmnet4
+rangerE5
+Train RFE Model - (Step 4 of 4)
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    56     38     26 
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+43
+86
+128
+170
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+43
+86
+128
+170
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Perform DCV Log Ratio Selection - (Step 1 of 4)
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Compute number of distinct parts
+Train Ridge Regression Model - (Step 2 of 4)
+Train Ensemble Model - (Step 3 of 4)
+ranger1
+pls2
+svmRadial3
+glmnet4
+rangerE5
+Train RFE Model - (Step 4 of 4)
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls < cases
+Setting direction: controls < cases
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    56     38     26 
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+25
+49
+73
+97
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+    CD nonIBD     UC 
+    28     19     13 
+25
+49
+73
+97
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Perform DCV Log Ratio Selection - (Step 1 of 4)
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores CD_UC-(1 of 3)
+Fold 1 of 1
+Compute DCV Scores CD_nonIBD-(2 of 3)
+Fold 1 of 1
+Compute DCV Scores UC_nonIBD-(3 of 3)
+Fold 1 of 1
+Compute number of distinct parts
+Train Ridge Regression Model - (Step 2 of 4)
+Train Ensemble Model - (Step 3 of 4)
+ranger1
+pls2
+svmRadial3
+glmnet4
+rangerE5
+Train RFE Model - (Step 4 of 4)
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+Setting direction: controls > cases
+Setting direction: controls < cases
+Setting direction: controls > cases
+There were 24 warnings (use warnings() to see them)
+Timing stopped at: 0.071 0 0.07
+Timing stopped at: 0.056 0 0.055
+Timing stopped at: 0.041 0 0.041
+Timing stopped at: 0.068 0 0.068
+Timing stopped at: 0.075 0 0.075
+Timing stopped at: 0.042 0 0.042
+Timing stopped at: 0.079 0 0.079
+Timing stopped at: 0.068 0 0.069
+Timing stopped at: 0.053 0 0.054
+Timing stopped at: 0.053 0 0.053
+Error in { : 
+  task 1 failed - "NA/NaN/Inf in foreign function call (arg 5)"
+Calls: system.time -> %dopar% -> <Anonymous>
+Timing stopped at: 5.51 0.001 5.513
+Execution halted
