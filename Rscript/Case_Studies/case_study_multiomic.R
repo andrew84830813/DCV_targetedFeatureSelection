@@ -276,12 +276,12 @@ benchmark = data.frame()
     benchmark = rbind(benchmark,perf)
     
     ## Store data type specif features - train 
-    merdat = data.frame(ttData$train_ids[,-3],outer_fold = f,seed = seed_,tar_dcv$rfe_features$train)
+    merdat = data.frame(ttData$train_ids[,-3],outer_fold = f,seed = sd,tar_dcv$rfe_features$train)
     merdat = gather(merdat,"log_ratio","value",5:ncol(merdat))
     merdat$log_ratio = paste0(dt,"._.",merdat$log_ratio)
     multiomic.train = rbind(multiomic.train,merdat)
     ## Store data type specif features - test 
-    merdat = data.frame(ttData$test_ids[,-3],outer_fold = f,seed = seed_,tar_dcv$rfe_features$test)
+    merdat = data.frame(ttData$test_ids[,-3],outer_fold = f,seed = sd,tar_dcv$rfe_features$test)
     merdat = gather(merdat,"log_ratio","value",5:ncol(merdat))
     merdat$log_ratio = paste0(dt,"._.",merdat$log_ratio)
     multiomic.test = rbind(multiomic.test,merdat)

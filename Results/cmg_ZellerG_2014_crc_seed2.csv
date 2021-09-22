@@ -1,0 +1,11 @@
+Scenario,Dataset,Seed,Fold,Approach,AUC,number_parts,number_ratios,comp_time,base_dims
+Empirical,cmg_ZellerG_2014_crc_seed2,2,1,CLR-LASSO,0.7525641025641026,24,24,0.41800000000000104,265
+Empirical,cmg_ZellerG_2014_crc_seed2,2,1,Coda-LASSO,0.675,241,1,42.057,265
+Empirical,cmg_ZellerG_2014_crc_seed2,2,2,DCV-ridgeRegression,0.8474358974358974,100,573,NA,265
+Empirical,cmg_ZellerG_2014_crc_seed2,2,2,DCV-ridgeEnsemble,0.8551282051282051,100,573,NA,265
+Empirical,cmg_ZellerG_2014_crc_seed2,2,2,DCV-rfRFE,0.8423076923076923,99,435,NA,265
+Empirical,cmg_ZellerG_2014_crc_seed2,2,2,CLR-LASSO,0.735897435897436,12,12,0.3129999999998745,267
+Empirical,cmg_ZellerG_2014_crc_seed2,2,2,Coda-LASSO,0.7044871794871795,95,1,61.82600000000002,267
+Empirical,cmg_ZellerG_2014_crc_seed2,2,2,DCV-ridgeRegression,0.7923076923076923,100,668,NA,267
+Empirical,cmg_ZellerG_2014_crc_seed2,2,2,DCV-ridgeEnsemble,0.7897435897435897,100,668,NA,267
+Empirical,cmg_ZellerG_2014_crc_seed2,2,2,DCV-rfRFE,0.7833333333333333,95,512,NA,267

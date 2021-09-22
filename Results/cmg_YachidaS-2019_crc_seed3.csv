@@ -1,0 +1,11 @@
+Scenario,Dataset,Seed,Fold,Approach,AUC,number_parts,number_ratios,comp_time,base_dims
+Empirical,cmg_YachidaS-2019_crc_seed3,3,1,CLR-LASSO,0.6679069767441861,23,23,1.940999999999999,214
+Empirical,cmg_YachidaS-2019_crc_seed3,3,1,Coda-LASSO,0.6670387596899224,87,1,602.671,214
+Empirical,cmg_YachidaS-2019_crc_seed3,3,2,DCV-ridgeRegression,0.6986666666666667,160,1105,NA,214
+Empirical,cmg_YachidaS-2019_crc_seed3,3,2,DCV-ridgeEnsemble,0.6957519379844961,160,1105,NA,214
+Empirical,cmg_YachidaS-2019_crc_seed3,3,2,DCV-rfRFE,0.6906666666666667,121,331,NA,214
+Empirical,cmg_YachidaS-2019_crc_seed3,3,2,CLR-LASSO,0.6827746975806451,39,39,2.4450000000001637,209
+Empirical,cmg_YachidaS-2019_crc_seed3,3,2,Coda-LASSO,0.6535408266129032,80,1,780.7820000000002,209
+Empirical,cmg_YachidaS-2019_crc_seed3,3,2,DCV-ridgeRegression,0.7029989919354839,157,1161,NA,209
+Empirical,cmg_YachidaS-2019_crc_seed3,3,2,DCV-ridgeEnsemble,0.7015498991935484,157,1161,NA,209
+Empirical,cmg_YachidaS-2019_crc_seed3,3,2,DCV-rfRFE,0.6966355846774194,127,348,NA,209

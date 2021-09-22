@@ -1,0 +1,167 @@
+Loading required package: lattice
+Loading required package: ggplot2
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Welcome to compositions, a package for compositional data analysis.
+Find an intro with "? compositions"
+
+
+Attaching package: ‘compositions’
+
+The following object is masked from ‘package:caret’:
+
+    R2
+
+The following objects are masked from ‘package:stats’:
+
+    cor, cov, dist, var
+
+The following objects are masked from ‘package:base’:
+
+    %*%, norm, scale, scale.default
+
+Loading required package: Matrix
+
+Attaching package: ‘Matrix’
+
+The following objects are masked from ‘package:tidyr’:
+
+    expand, pack, unpack
+
+Loaded glmnet 4.1-1
+
+Attaching package: ‘glmnet’
+
+The following object is masked from ‘package:compositions’:
+
+    rmult
+
+
+ S1  S2 
+100 100 
+Warning message:
+executing %dopar% sequentially: no parallel backend registered 
+
+
+``````` Start Seed:  1````````````
+
+
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+S1 S2 
+50 50 
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+S1 S2 
+25 25 
+34
+67
+100
+133
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+S1 S2 
+25 25 
+34
+67
+100
+133
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores S1_S2-(1 of 1)
+Fold 1 of 1
+Perform DCV Log Ratio Selection - (Step 1 of 4)
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores S1_S2-(1 of 1)
+Fold 1 of 1
+Compute number of distinct parts
+Train Ridge Regression Model - (Step 2 of 4)
+Setting levels: control = S1, case = S2
+Setting direction: controls > cases
+Train Ensemble Model - (Step 3 of 4)
+ranger1
+pls2
+svmRadial3
+glmnet4
+rangerE5
+Train RFE Model - (Step 4 of 4)
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+S1 S2 
+50 50 
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+S1 S2 
+25 25 
+34
+67
+100
+133
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+S1 S2 
+25 25 
+34
+67
+100
+133
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores S1_S2-(1 of 1)
+Fold 1 of 1
+Perform DCV Log Ratio Selection - (Step 1 of 4)
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Joining, by = "f"
+Compute DCV Scores S1_S2-(1 of 1)
+Fold 1 of 1
+Compute number of distinct parts
+Train Ridge Regression Model - (Step 2 of 4)
+Setting levels: control = S1, case = S2
+Setting direction: controls > cases
+Train Ensemble Model - (Step 3 of 4)
+ranger1
+pls2
+svmRadial3
+glmnet4
+rangerE5
+Train RFE Model - (Step 4 of 4)
+
+
+``````` Start Seed:  2````````````
+
+
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+S1 S2 
+50 50 
+Fold-1 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+S1 S2 
+25 25 
+34
+67
+100
+133
+Fold-2 Extract Partitions, Estimate Sparisty, and Return Counts (if Counts Exist) without Imputation
+
+S1 S2 
+25 25 
+34

@@ -174,6 +174,8 @@ mxSparsePercent = .9
 benchmark = data.frame()
 
 
+seed_ = sd
+
 #for(sd in 1:5){
   set.seed(sd)
   

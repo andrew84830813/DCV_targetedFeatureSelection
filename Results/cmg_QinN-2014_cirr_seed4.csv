@@ -1,0 +1,11 @@
+Scenario,Dataset,Seed,Fold,Approach,AUC,number_parts,number_ratios,comp_time,base_dims
+Empirical,cmg_QinN-2014_cirr_seed4,4,1,CLR-LASSO,0.9361518550474547,32,32,0.40300000000000047,217
+Empirical,cmg_QinN-2014_cirr_seed4,4,1,Coda-LASSO,0.9413287316652286,62,1,140.633,217
+Empirical,cmg_QinN-2014_cirr_seed4,4,2,DCV-ridgeRegression,0.9373022720736267,163,1976,NA,217
+Empirical,cmg_QinN-2014_cirr_seed4,4,2,DCV-ridgeEnsemble,0.9401783146390567,163,1976,NA,217
+Empirical,cmg_QinN-2014_cirr_seed4,4,2,DCV-rfRFE,0.9384526890997986,142,592,NA,217
+Empirical,cmg_QinN-2014_cirr_seed4,4,2,CLR-LASSO,0.9371816638370118,35,35,0.3650000000000091,218
+Empirical,cmg_QinN-2014_cirr_seed4,4,2,Coda-LASSO,0.9335031126202603,29,1,131.42500000000018,218
+Empirical,cmg_QinN-2014_cirr_seed4,4,2,DCV-ridgeRegression,0.9425580079230333,42,197,NA,218
+Empirical,cmg_QinN-2014_cirr_seed4,4,2,DCV-ridgeEnsemble,0.9408602150537634,42,197,NA,218
+Empirical,cmg_QinN-2014_cirr_seed4,4,2,DCV-rfRFE,0.9377475947934352,40,151,NA,218
