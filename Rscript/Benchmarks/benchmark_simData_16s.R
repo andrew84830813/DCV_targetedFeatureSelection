@@ -405,4 +405,7 @@ for(sd in 1:5){
   }
 }
 
+
+benchmark$permuteLabel = permute_labels
+benchmark$shift_parm = shift_par
 write_csv(x = benchmark,file = paste0("Results/",f_name,".csv"))
