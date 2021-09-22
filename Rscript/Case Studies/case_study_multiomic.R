@@ -77,6 +77,7 @@ benchmark = data.frame()
     ## Extract Test/Train Split
     ttData = DiCoVarML::extractTrainTestSplit(foldDataList = allData,
                                               fold = f,
+                                              permLabels = permute_labels,
                                               maxSparisty = .9,
                                               extractTelAbunance = F)
     ##get train test partitions
@@ -434,7 +435,8 @@ benchmark = data.frame()
   
   benchmark = rbind(benchmark,perf)
   
-  
+
+    
   ## Use RFE To select features and train model
   compTime2 = system.time({
     pp = rfeSelection.ByMetric(train_ratio = train.data,

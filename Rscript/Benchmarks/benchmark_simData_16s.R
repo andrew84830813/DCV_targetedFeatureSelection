@@ -64,7 +64,7 @@ dat = data.frame(t(zinbwave::zinbSim(mdwgs)$counts));
 dat = sample_n(dat,size = g1+g2,replace = F);
 labels = sample(c(rep("S1",g1),rep("S2",g2)));
 dat = data.frame(Status = labels,dat);
-f_name = paste0("16S_meanShift",shift_parm);
+f_name = paste0("16S_meanShift",shift_parm,"_permute",permute_labels,"_seed",seed_);
 #process shift
 procData = processCompData(dat,minPrevalence = sparsePercent);
 dat = procData$processedData;
@@ -102,6 +102,7 @@ for(sd in 1:5){
     ttData = DiCoVarML::extractTrainTestSplit(foldDataList = allData,
                                               fold = f,
                                               maxSparisty = .9,
+                                              permLabels = permute_labels,
                                               extractTelAbunance = F)
     ##get train test partitions
     train.data = ttData$train_Data
@@ -129,10 +130,6 @@ for(sd in 1:5){
       ztrain <- predict(pp, ztrain)
       ztest     <- predict(pp, ztest)
       
-      ## Should labels be permuted
-      if(permute_labels){
-        yt = sample(yt)
-      }
       
       type_family = if_else(length(classes)>2,"multinomial","binomial")
       compTime = system.time({
@@ -215,12 +212,6 @@ for(sd in 1:5){
       ztrain = ztransform(xt)
       ztest = ztransform(xtest,p_c = ztrain$proj)$dat
       ztrain = ztrain$dat
-      
-      
-      ## Should labels be permuted
-      if(permute_labels){
-        ytr = sample(ytr)
-      }
       
       compTime = system.time({
         devexp = foreach::foreach(l = cv.clrlasso$lambda,.combine = rbind )%dopar%{

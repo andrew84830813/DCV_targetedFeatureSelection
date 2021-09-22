@@ -66,7 +66,7 @@ dat = data.frame(t(zinbwave::zinbSim(mdwgs)$counts));
 dat = sample_n(dat,size = g1+g2,replace = F);
 labels = sample(c(rep("S1",g1),rep("S2",g2)));
 dat = data.frame(Status = labels,dat);
-f_name = paste0("WGS_meanShift_",shift_parm);
+f_name = paste0("WGS_meanShift",shift_parm,"_permute",permute_labels,"_seed",seed_);
 #process shift
 procData = processCompData(dat,minPrevalence = sparsePercent);
 dat = procData$processedData;
@@ -102,6 +102,7 @@ for(sd in 1:5){
     
     ## Extract Test/Train Split
     ttData = DiCoVarML::extractTrainTestSplit(foldDataList = allData,
+                                              permLabels = permute_labels,
                                               fold = f,
                                               maxSparisty = .9,
                                               extractTelAbunance = F)

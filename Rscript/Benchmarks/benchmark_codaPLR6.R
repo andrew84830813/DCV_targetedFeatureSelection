@@ -194,6 +194,7 @@ seed_ = sd
     ## Extract Test/Train Split
     ttData = DiCoVarML::extractTrainTestSplit(foldDataList = allData,
                                               fold = f,
+                                              permLabels = permute_labels,
                                               maxSparisty = .9,
                                               extractTelAbunance = F)
     ##get train test partitions
@@ -222,10 +223,7 @@ seed_ = sd
       ztrain <- predict(pp, ztrain)
       ztest     <- predict(pp, ztest)
       
-      ## Should labels be permuted
-      if(permute_labels){
-        yt = sample(yt)
-      }
+     
       
       type_family = if_else(length(classes)>2,"multinomial","binomial")
       compTime = system.time({
@@ -310,11 +308,7 @@ seed_ = sd
       ztrain = ztrain$dat
       
       
-      ## Should labels be permuted
-      if(permute_labels){
-        ytr = sample(ytr)
-      }
-      
+    
       compTime = system.time({
         devexp = foreach::foreach(l = cv.clrlasso$lambda,.combine = rbind )%dopar%{
           HFHS.results_codalasso <- coda_logistic_lasso(ytr,(xt),lambda = l)
