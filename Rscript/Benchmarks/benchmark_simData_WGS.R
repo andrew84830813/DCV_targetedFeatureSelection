@@ -30,8 +30,8 @@ source(file = 'CODA_Functions/functions_coda_penalized_regression.R')
 # Setup Cluster ---------------------------------------------------------------
 
 ## Detect Cores
-clus <- parallel::makeCluster(10)
-doParallel::registerDoParallel(clus)
+# clus <- parallel::makeCluster(10)
+# doParallel::registerDoParallel(clus)
 
 
 
@@ -77,7 +77,7 @@ y = y[,!bool];
 dat = data.frame(Status = dat[,1],fastImputeZeroes( compositions::clo(y),impFactor = impFact));
 
 
-sets = seq(1.1,1.3,length.out = 6)
+sets = seq(1,1.3,length.out = 6)
 df = simFromExpData.largeMeanShft(raMatrix = dat[,-1],
                                    n1 = g1,n2 = g2,
                                    featureShiftPercent =  sets[shift_parm],

@@ -38,52 +38,143 @@ source(file = 'CODA_Functions/functions_coda_penalized_regression.R')
 
 # Read External Args ---------------------------------------------------------------
 
-args = c(1,2,0)
+args = c(2,4,0)
 args = commandArgs(trailingOnly = TRUE)
-seed_ = as.numeric(args[1]) # random seed selection
-shift_parm = as.numeric(args[2])
+sd = as.numeric(args[1]) # random seed selection
+dataset = as.numeric(args[2])
 permute_labels = as.logical(as.numeric(args[3])) #should be 0(False) or 1(True)
 
 
 ## set random seed
-set.seed(seed_)
+set.seed(sd)
 
 
-## Scenario-1 = Sim from 16S Data with mean shift
-g1 = 100
-g2 = 100
-sparsePercent = .9
+
+
+# Load Data ---------------------------------------------------------------
+
+switch(dataset,
+       
+       {
+         load("Output/curatedMetaGenome_RubelMA_2020.Rda"); ## good
+         keep = c("control","STH");
+         f_name = "cmg_RubelMA-2020_STH"
+       },
+       
+       {
+         load("Output/curatedMetaGenome_ZhuF_2020.Rda") ## good
+         keep = c("control","schizofrenia");
+         f_name = "cmg_ZhuF-2020_schizo"
+         
+       },
+       
+       {
+         load("Output/curatedMetaGenome_QinN_2014.Rda")
+         keep = c("control","cirrhosis");
+         f_name = "cmg_QinN-2014_cirr"
+       },
+       
+       {
+         load("Output/curatedMetaGenome_NielsenHB_2014.Rda");
+         keep = c("control","IBD");
+         f_name = "cmg_NielsenHB-2014_ibd"
+         
+       },
+       
+       {
+         load("Output/curatedMetaGenome_FengQ_2015.Rda");
+         keep = c("control","CRC");
+         f_name = "cmg_FengQ-2015_crc"
+         
+       },
+       
+       {
+         load("Output/curatedMetaGenome_ThomasAM_2019_c.Rda");
+         keep = c("control","CRC");
+         f_name = "cmg_ThomasAM_2019_crc"
+         
+       },
+       
+       {
+         load("Output/curatedMetaGenome_WirbelJ_2018.Rda");
+         keep = c("control","CRC");
+         f_name = "cmg_WirbelJ-2018_crc"
+       },
+       
+       {
+         load("Output/curatedMetaGenome_YachidaS_2019.Rda");
+         f_name = "cmg_YachidaS-2019_crc";
+         keep = c("control","CRC")       
+       },
+       
+       {
+         load("Output/curatedMetaGenome_ZellerG_2014.Rda");
+         f_name = "cmg_ZellerG_2014_crc";
+         keep = c("control","CRC")
+       },
+       
+       {
+         load("Output/curatedMetaGenome_VogtmannE_2016.Rda");
+         f_name = "cmg_ZVogtmannE_2016_crc";
+         keep = c("control","CRC")
+       },
+       
+       {
+         load("Output/curatedMetaGenome_YuJ_2015.Rda");
+         f_name = "cmg_YuJ_2015_crc";
+         keep = c("control","CRC")
+       }
+       
+       
+       
+       
+    
+       
+)
+
+
+f_name = paste0(f_name,"_seed",sd)
+
+
+## Process Data
+df = expResults$taxa.df
+df = data.frame(sample_id = rownames(df),df)
+df$Status = str_replace_all(df$Status,pattern = "\\/","_")
+rs = rowSums(df[,-2:-1])
+bool = rs>10e6
+df = df[bool,]
+df = df[df$Status %in% keep,]
+md = expResults$metadata
+## by taxa level
+cname.table = expResults$taxa_info [,-1]
+taxa_levels =colnames(cname.table)
+cname.table = data.frame(ID = cname.table$species,cname.table)
+rdphf = tidyr::gather(df,"ID","Count",3:ncol(df))
+cname.table$ID = stringr::str_replace_all(cname.table$ID,pattern = " ",replacement = "\\.")
+rdphf$ID = stringr::str_replace_all(rdphf$ID,pattern = " ",replacement = "\\.")
+rdphf = left_join(rdphf,cname.table)
+level.list = list()
+for(taxa_level in c("species")){
+  rdf = subset(rdphf,select = c("sample_id","Status",taxa_level,"Count"))
+  rdf = rdf %>%
+    dplyr::group_by(sample_id,get(taxa_level),Status) %>%
+    dplyr::summarise(count = sum(Count) ) %>%
+    rename(tlevel = "get(taxa_level)" ) %>%
+    spread("tlevel","count",fill = 0)
+  rdf = data.frame(rdf[,-1],row.names = rdf$sample_id )
+  # rdf = rdf[rdf$Status %in% c("control","CRC"),]
+  colnames(rdf)[-1] = paste0(str_sub(taxa_level,1,1),"__",colnames(rdf)[-1])
+  level.list[[taxa_level]] = rdf
+}
+df = level.list$species
+df = df[!is.na(df$Status),]
+mxSparsePercent = .9
+
+
 benchmark = data.frame()
 
 
-
-
-mdwgs = readRDS("Output/16sModel.RDS");
-set.seed(seed_);
-dat = data.frame(t(zinbwave::zinbSim(mdwgs)$counts));
-dat = sample_n(dat,size = g1+g2,replace = F);
-labels = sample(c(rep("S1",g1),rep("S2",g2)));
-dat = data.frame(Status = labels,dat);
-f_name = paste0("16S_meanShift",shift_parm);
-#process shift
-procData = processCompData(dat,minPrevalence = sparsePercent);
-dat = procData$processedData;
-impFact = procData$impFactor;
-y = dat[,-1];
-bool = colSums(y)==0;
-y = y[,!bool];
-dat = data.frame(Status = dat[,1],fastImputeZeroes( compositions::clo(y),impFactor = impFact));
-
-
-sets = seq(1,1.3,length.out = 6)
-df = simFromExpData.largeMeanShft(raMatrix = dat[,-1],
-                                  n1 = g1,n2 = g2,
-                                  featureShiftPercent =  sets[shift_parm],
-                                  perFixedFeatures = .9)
-
-
-
-for(sd in 1:5){
+#for(sd in 1:5){
   set.seed(sd)
   
   ## Partition Data
@@ -403,9 +494,61 @@ for(sd in 1:5){
     
     
   }
-}
 
+#}
 
-benchmark$permuteLabel = permute_labels
-benchmark$shift_parm = shift_par
+ 
+
 write_csv(x = benchmark,file = paste0("Results/",f_name,".csv"))
+
+
+# res = benchmark %>% 
+#   group_by(Approach,Dataset) %>% 
+#   summarise_all(mean) %>% 
+#   arrange(desc(AUC))
+# res = data.frame(res)
+# 
+# 
+# benchmark$Approach = factor(benchmark$Approach,levels = res$Approach)
+# res = benchmark %>% 
+#   group_by(Approach,Dataset,Seed) %>% 
+#   summarise_all(mean) %>% 
+#   arrange(desc(AUC))
+# res = data.frame(res)
+# write_csv(benchmark,paste0(f_name,".csv"))
+# 
+# tiff(filename =paste0(f_name,".tiff"),width = 4.5,height = 5.5,units = "in",res = 300)
+# ggplot(benchmark,aes(Approach,AUC))+
+#   theme_bw()+
+#   coord_flip()+
+#   stat_summary(fun.y = mean, geom = "point",size = 5,col = "black")+
+#   stat_summary(fun.data = mean_se,geom = "errorbar")+
+#   theme(legend.position = "top",
+#         plot.title = element_text(size = 7,hjust = .5,face = "bold"),
+#         #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
+#         axis.title = element_text(size = 12),
+#         #axis.title.y = element_blank(),
+#         #axis.text.y = element_text(size = 7),
+#         #axis.text.y = element_blank(),
+#         #legend.margin=margin(-1,-1,-1,-1),
+#         strip.switch.pad.wrap = margin(0,0,0,0),
+#         legend.margin=margin(-5,-10,-10,-10),
+#         axis.text = element_text(size = 12),
+#         #panel.grid = element_blank(),
+#         legend.key.size = unit(.15,units = "in"),
+#         legend.text = element_text(size = 8),
+#         legend.title = element_text(size = 8),
+#         #legend.background = element_rect(colour = "black")
+#   )
+# 
+# dev.off()
+# 
+# 
+# 
+# 
+# ## kruskal test
+# kw = spread(benchmark[,1:6],"Approach","AUC")
+# kruskal.test(x = res$AUC,g = res$Approach)
+# 
+# wilcox.test(x = kw$`DCV-rfRFE`,y = kw$`CLR-LASSO`,paired = T,alternative = "two.sided")
+# wilcox.test(x = kw$`DCV-ridgeEnsemble`,y = kw$`Coda-LASSO`,paired = T,alternative = "two.sided")

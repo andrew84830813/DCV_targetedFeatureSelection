@@ -30,8 +30,8 @@ source(file = 'CODA_Functions/functions_coda_penalized_regression.R')
 # Setup Cluster ---------------------------------------------------------------
 
 ## Detect Cores
-clus <- parallel::makeCluster(10)
-doParallel::registerDoParallel(clus)
+# clus <- parallel::makeCluster(10)
+# doParallel::registerDoParallel(clus)
 
 
 
@@ -370,7 +370,7 @@ for(sd in 1:5){
     
     
     ensemble = c("ranger","pls","svmRadial","glmnet","rangerE")
-    ensemble = c("ranger","xgbTree","xgbLinear")
+    #ensemble = c("ranger","xgbTree","xgbLinear")
     max_sparsity = .9
     
     
