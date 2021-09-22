@@ -37,8 +37,9 @@ targeted_dcvSelection = function(trainx,
   geo.mean = function(x){
     exp(mean(log(x)))
   }
+  compTime = 0
   
-  
+  prob_matrices = list()
   
   
   # Train Final Model -------------------------------------------------------
@@ -151,10 +152,14 @@ targeted_dcvSelection = function(trainx,
     if(type_family=="binomial"){
       mroc = pROC::roc(y_test,p)
       mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+      pmat = data.frame(p,1-p);colnames(pmat) = classes
+
     }else{
       ## multiclass
       mroc = pROC::multiclass.roc(y_test,p[,,1])
       mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+      pmat = data.frame(p[,,1])#;colnames(pmat) = classes
+      
     }
     ## Save Performance
     perf = data.frame(Approach = "DCV-ridgeRegression",
@@ -164,6 +169,9 @@ targeted_dcvSelection = function(trainx,
                       comp_time = compTime[3]+compTime2[3],
                       base_dims = baseDims)
     result = rbind(result,perf)
+    prob_matrices[["ridgeRegression"]] = data.frame(Status = y_test,pmat)
+    
+    
     
     
     message("Train Ensemble Model - (Step 3 of 4)")
@@ -209,7 +217,7 @@ targeted_dcvSelection = function(trainx,
                       comp_time = compTime[3]+compTime2[3],
                       base_dims = baseDims)
     result = rbind(result,perf)
-    
+    prob_matrices[["ridgeEnsemble"]] = pmat
     
     
     message("Train RFE Model - (Step 4 of 4)")
@@ -271,6 +279,7 @@ targeted_dcvSelection = function(trainx,
                         comp_time = compTime[3]+compTime2[3],
                         base_dims = baseDims)
       result = rbind(result,perf)
+      prob_matrices[["rfRFE"]] = pmat
     }))
     
     
@@ -279,9 +288,10 @@ targeted_dcvSelection = function(trainx,
     return(list(Performance = result,all_model_preds = ph$predictionMatrix,
                 weighted_features = list(train = train_data2,test = test_data2),
                 part_matrices = list(train = train_subcomp,test = test_subcomp),
-                ridge_coefficients = c,
+                ridge_coefficients = c,probMatrices  = prob_matrices,
                 final_dcv = dcv, 
                 ensemble_pmat = pmat,
+                rfe_features = list(train = train_data2,test =test_data2),
                 ridge_pmat = p ))
     
 

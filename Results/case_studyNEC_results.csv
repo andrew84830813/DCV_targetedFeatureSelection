@@ -1,0 +1,251 @@
+Scenario,Dataset,Seed,Fold,Approach,AUC,number_parts,number_ratios,comp_time,base_dims
+Empirical,case_study_NEC,1,1,meta_alone,0.6317965023847377,11,10,NA,23
+Empirical,case_study_NEC,1,1,DCV-ridgeRegression,0.6899046104928458,17,25,NA,23
+Empirical,case_study_NEC,1,1,DCV-ridgeEnsemble,0.6748012718600954,17,25,NA,23
+Empirical,case_study_NEC,1,1,DCV-rfRFE,0.6864069952305246,13,17,NA,23
+Empirical,case_study_NEC,1,1,mbiome + meta_data,0.6631160572337043,22,25,NA,23
+Empirical,case_study_NEC,1,2,meta_alone,0.7525641025641026,13,12,NA,23
+Empirical,case_study_NEC,1,2,DCV-ridgeRegression,0.7638461538461538,17,26,NA,23
+Empirical,case_study_NEC,1,2,DCV-ridgeEnsemble,0.7023076923076923,17,26,NA,23
+Empirical,case_study_NEC,1,2,DCV-rfRFE,0.7048717948717949,15,22,NA,23
+Empirical,case_study_NEC,1,2,mbiome + meta_data,0.6943589743589744,24,29,NA,23
+Empirical,case_study_NEC,1,3,meta_alone,0.7194805194805195,11,10,NA,22
+Empirical,case_study_NEC,1,3,DCV-ridgeRegression,0.5931818181818181,5,4,NA,22
+Empirical,case_study_NEC,1,3,DCV-ridgeEnsemble,0.5850649350649351,5,4,NA,22
+Empirical,case_study_NEC,1,3,DCV-rfRFE,0.5762987012987013,5,4,NA,22
+Empirical,case_study_NEC,1,3,mbiome + meta_data,0.6633116883116883,15,13,NA,22
+Empirical,case_study_NEC,1,4,meta_alone,0.5213926174496644,6,5,NA,22
+Empirical,case_study_NEC,1,4,DCV-ridgeRegression,0.5985738255033557,16,24,NA,22
+Empirical,case_study_NEC,1,4,DCV-ridgeEnsemble,0.325503355704698,16,24,NA,22
+Empirical,case_study_NEC,1,4,DCV-rfRFE,0.3485738255033557,9,11,NA,22
+Empirical,case_study_NEC,1,4,mbiome + meta_data,0.39303691275167785,15,16,NA,22
+Empirical,case_study_NEC,1,5,meta_alone,0.6626226122870418,6,5,NA,21
+Empirical,case_study_NEC,1,5,DCV-ridgeRegression,0.7764584408879711,12,12,NA,21
+Empirical,case_study_NEC,1,5,DCV-ridgeEnsemble,0.7885906040268457,12,12,NA,21
+Empirical,case_study_NEC,1,5,DCV-rfRFE,0.802787816210635,7,7,NA,21
+Empirical,case_study_NEC,1,5,mbiome + meta_data,0.7578729994837378,13,12,NA,21
+Empirical,case_study_NEC,2,1,meta_alone,0.519898780768346,12,11,NA,24
+Empirical,case_study_NEC,2,1,DCV-ridgeRegression,0.5044858523119392,18,21,NA,24
+Empirical,case_study_NEC,2,1,DCV-ridgeEnsemble,0.39843570278352886,18,21,NA,24
+Empirical,case_study_NEC,2,1,DCV-rfRFE,0.41522889348976305,13,14,NA,24
+Empirical,case_study_NEC,2,1,mbiome + meta_data,0.4230503795721187,23,23,NA,24
+Empirical,case_study_NEC,2,2,meta_alone,0.6397687280040221,6,5,NA,22
+Empirical,case_study_NEC,2,2,DCV-ridgeRegression,0.5267722473604827,16,22,NA,22
+Empirical,case_study_NEC,2,2,DCV-ridgeEnsemble,0.4888134741075918,16,22,NA,22
+Empirical,case_study_NEC,2,2,DCV-rfRFE,0.5317998994469583,10,14,NA,22
+Empirical,case_study_NEC,2,2,mbiome + meta_data,0.5186023127199598,9,6,NA,22
+Empirical,case_study_NEC,2,3,meta_alone,0.75,7,6,NA,20
+Empirical,case_study_NEC,2,3,DCV-ridgeRegression,0.7827814569536423,12,16,NA,20
+Empirical,case_study_NEC,2,3,DCV-ridgeEnsemble,0.8427152317880795,12,16,NA,20
+Empirical,case_study_NEC,2,3,DCV-rfRFE,0.8490066225165563,9,11,NA,20
+Empirical,case_study_NEC,2,3,mbiome + meta_data,0.8728476821192053,15,16,NA,20
+Empirical,case_study_NEC,2,4,meta_alone,0.5315230224321134,13,12,NA,23
+Empirical,case_study_NEC,2,4,DCV-ridgeRegression,0.8219598583234947,17,25,NA,23
+Empirical,case_study_NEC,2,4,DCV-ridgeEnsemble,0.8141676505312869,17,25,NA,23
+Empirical,case_study_NEC,2,4,DCV-rfRFE,0.817237308146399,12,14,NA,23
+Empirical,case_study_NEC,2,4,mbiome + meta_data,0.7296340023612751,10,10,NA,23
+Empirical,case_study_NEC,2,5,meta_alone,0.5349282296650717,8,7,NA,21
+Empirical,case_study_NEC,2,5,DCV-ridgeRegression,0.45964912280701753,16,26,NA,21
+Empirical,case_study_NEC,2,5,DCV-ridgeEnsemble,0.5508771929824561,16,26,NA,21
+Empirical,case_study_NEC,2,5,DCV-rfRFE,0.6047846889952153,13,20,NA,21
+Empirical,case_study_NEC,2,5,mbiome + meta_data,0.6427432216905901,15,16,NA,21
+Empirical,case_study_NEC,3,1,meta_alone,0.8265873015873015,6,5,NA,22
+Empirical,case_study_NEC,3,1,DCV-ridgeRegression,0.7494047619047619,16,22,NA,22
+Empirical,case_study_NEC,3,1,DCV-ridgeEnsemble,0.725,16,22,NA,22
+Empirical,case_study_NEC,3,1,DCV-rfRFE,0.7478174603174603,11,14,NA,22
+Empirical,case_study_NEC,3,1,mbiome + meta_data,0.7813492063492063,13,12,NA,22
+Empirical,case_study_NEC,3,2,meta_alone,0.7332683560753737,13,12,NA,22
+Empirical,case_study_NEC,3,2,DCV-ridgeRegression,0.8421052631578947,16,22,NA,22
+Empirical,case_study_NEC,3,2,DCV-ridgeEnsemble,0.8846653671215075,16,22,NA,22
+Empirical,case_study_NEC,3,2,DCV-rfRFE,0.8830409356725146,14,19,NA,22
+Empirical,case_study_NEC,3,2,mbiome + meta_data,0.8840155945419104,27,31,NA,22
+Empirical,case_study_NEC,3,3,meta_alone,0.8770712909441233,7,6,NA,22
+Empirical,case_study_NEC,3,3,DCV-ridgeRegression,0.6832369942196531,16,33,NA,22
+Empirical,case_study_NEC,3,3,DCV-ridgeEnsemble,0.6734104046242775,16,33,NA,22
+Empirical,case_study_NEC,3,3,DCV-rfRFE,0.7768786127167631,10,15,NA,22
+Empirical,case_study_NEC,3,3,mbiome + meta_data,0.8641618497109826,14,18,NA,22
+Empirical,case_study_NEC,3,4,meta_alone,0.6631139944392956,7,6,NA,23
+Empirical,case_study_NEC,3,4,DCV-ridgeRegression,0.6137627432808156,13,17,NA,23
+Empirical,case_study_NEC,3,4,DCV-ridgeEnsemble,0.45759962928637626,13,17,NA,23
+Empirical,case_study_NEC,3,4,DCV-rfRFE,0.4284059314179796,8,8,NA,23
+Empirical,case_study_NEC,3,4,mbiome + meta_data,0.5335959221501391,7,4,NA,23
+Empirical,case_study_NEC,3,5,meta_alone,0.42391304347826086,7,6,NA,20
+Empirical,case_study_NEC,3,5,DCV-ridgeRegression,0.552536231884058,15,25,NA,20
+Empirical,case_study_NEC,3,5,DCV-ridgeEnsemble,0.5042270531400966,15,25,NA,20
+Empirical,case_study_NEC,3,5,DCV-rfRFE,0.4849033816425121,11,19,NA,20
+Empirical,case_study_NEC,3,5,mbiome + meta_data,0.553743961352657,11,12,NA,20
+Empirical,case_study_NEC,4,1,meta_alone,0.4558258642765685,12,11,NA,20
+Empirical,case_study_NEC,4,1,DCV-ridgeRegression,0.6294814340588989,15,21,NA,20
+Empirical,case_study_NEC,4,1,DCV-ridgeEnsemble,0.5331306017925737,15,21,NA,20
+Empirical,case_study_NEC,4,1,DCV-rfRFE,0.6073943661971831,8,11,NA,20
+Empirical,case_study_NEC,4,1,mbiome + meta_data,0.5717029449423816,20,22,NA,20
+Empirical,case_study_NEC,4,2,meta_alone,0.6338992332968236,8,7,NA,25
+Empirical,case_study_NEC,4,2,DCV-ridgeRegression,0.5364184008762322,14,15,NA,25
+Empirical,case_study_NEC,4,2,DCV-ridgeEnsemble,0.5062979189485214,14,15,NA,25
+Empirical,case_study_NEC,4,2,DCV-rfRFE,0.48493975903614456,12,13,NA,25
+Empirical,case_study_NEC,4,2,mbiome + meta_data,0.40854326396495066,18,18,NA,25
+Empirical,case_study_NEC,4,3,meta_alone,0.7490551776266062,7,6,NA,22
+Empirical,case_study_NEC,4,3,DCV-ridgeRegression,0.5230536659108087,16,15,NA,22
+Empirical,case_study_NEC,4,3,DCV-ridgeEnsemble,0.5704207608969514,16,15,NA,22
+Empirical,case_study_NEC,4,3,DCV-rfRFE,0.5547996976568405,15,14,NA,22
+Empirical,case_study_NEC,4,3,mbiome + meta_data,0.5429579239103048,11,9,NA,22
+Empirical,case_study_NEC,4,4,meta_alone,0.5581534772182254,6,5,NA,22
+Empirical,case_study_NEC,4,4,DCV-ridgeRegression,0.7750299760191847,16,31,NA,22
+Empirical,case_study_NEC,4,4,DCV-ridgeEnsemble,0.7756294964028777,16,31,NA,22
+Empirical,case_study_NEC,4,4,DCV-rfRFE,0.7750299760191847,13,19,NA,22
+Empirical,case_study_NEC,4,4,mbiome + meta_data,0.7760791366906474,13,15,NA,22
+Empirical,case_study_NEC,4,5,meta_alone,0.6877828054298643,11,10,NA,21
+Empirical,case_study_NEC,4,5,DCV-ridgeRegression,0.8689839572192514,16,31,NA,21
+Empirical,case_study_NEC,4,5,DCV-ridgeEnsemble,0.8531468531468531,16,31,NA,21
+Empirical,case_study_NEC,4,5,DCV-rfRFE,0.8549979432332373,13,16,NA,21
+Empirical,case_study_NEC,4,5,mbiome + meta_data,0.8531468531468531,24,26,NA,21
+Empirical,case_study_NEC,5,1,meta_alone,0.5032098765432099,7,6,NA,22
+Empirical,case_study_NEC,5,1,DCV-ridgeRegression,0.758888888888889,16,17,NA,22
+Empirical,case_study_NEC,5,1,DCV-ridgeEnsemble,0.6924691358024692,16,17,NA,22
+Empirical,case_study_NEC,5,1,DCV-rfRFE,0.6734567901234568,5,5,NA,22
+Empirical,case_study_NEC,5,1,mbiome + meta_data,0.7180246913580246,10,9,NA,22
+Empirical,case_study_NEC,5,2,meta_alone,0.7232767232767233,6,5,NA,23
+Empirical,case_study_NEC,5,2,DCV-ridgeRegression,0.6638361638361638,17,18,NA,23
+Empirical,case_study_NEC,5,2,DCV-ridgeEnsemble,0.5374625374625375,17,18,NA,23
+Empirical,case_study_NEC,5,2,DCV-rfRFE,0.5272227772227772,15,15,NA,23
+Empirical,case_study_NEC,5,2,mbiome + meta_data,0.5576923076923077,14,12,NA,23
+Empirical,case_study_NEC,5,3,meta_alone,0.6077441077441077,6,5,NA,23
+Empirical,case_study_NEC,5,3,DCV-ridgeRegression,0.7376543209876544,13,15,NA,23
+Empirical,case_study_NEC,5,3,DCV-ridgeEnsemble,0.6978114478114478,13,15,NA,23
+Empirical,case_study_NEC,5,3,DCV-rfRFE,0.7008978675645342,10,11,NA,23
+Empirical,case_study_NEC,5,3,mbiome + meta_data,0.7550505050505051,11,10,NA,23
+Empirical,case_study_NEC,5,4,meta_alone,0.5518367346938775,7,6,NA,22
+Empirical,case_study_NEC,5,4,DCV-ridgeRegression,0.457687074829932,16,19,NA,22
+Empirical,case_study_NEC,5,4,DCV-ridgeEnsemble,0.5586394557823129,16,19,NA,22
+Empirical,case_study_NEC,5,4,DCV-rfRFE,0.5627210884353742,9,9,NA,22
+Empirical,case_study_NEC,5,4,mbiome + meta_data,0.5526530612244898,16,15,NA,22
+Empirical,case_study_NEC,5,5,meta_alone,0.8176859029572208,6,5,NA,21
+Empirical,case_study_NEC,5,5,DCV-ridgeRegression,0.7849554981337927,16,21,NA,21
+Empirical,case_study_NEC,5,5,DCV-ridgeEnsemble,0.7614125753660638,16,21,NA,21
+Empirical,case_study_NEC,5,5,DCV-rfRFE,0.7863910422049957,14,19,NA,21
+Empirical,case_study_NEC,5,5,mbiome + meta_data,0.8148148148148148,11,11,NA,21
+Empirical,case_study_NEC,6,1,meta_alone,0.6698283649503162,11,10,NA,22
+Empirical,case_study_NEC,6,1,DCV-ridgeRegression,0.6054652213188798,16,24,NA,22
+Empirical,case_study_NEC,6,1,DCV-ridgeEnsemble,0.5526196928635952,16,24,NA,22
+Empirical,case_study_NEC,6,1,DCV-rfRFE,0.5433604336043361,15,22,NA,22
+Empirical,case_study_NEC,6,1,mbiome + meta_data,0.5677506775067751,24,30,NA,22
+Empirical,case_study_NEC,6,2,meta_alone,0.7714987714987716,6,5,NA,22
+Empirical,case_study_NEC,6,2,DCV-ridgeRegression,0.6677376677376677,16,19,NA,22
+Empirical,case_study_NEC,6,2,DCV-ridgeEnsemble,0.650916650916651,16,19,NA,22
+Empirical,case_study_NEC,6,2,DCV-rfRFE,0.6701946701946703,13,16,NA,22
+Empirical,case_study_NEC,6,2,mbiome + meta_data,0.7187677187677188,13,14,NA,22
+Empirical,case_study_NEC,6,3,meta_alone,0.5862002319288752,8,7,NA,25
+Empirical,case_study_NEC,6,3,DCV-ridgeRegression,0.541747197526092,14,19,NA,25
+Empirical,case_study_NEC,6,3,DCV-ridgeEnsemble,0.5177812137611133,14,19,NA,25
+Empirical,case_study_NEC,6,3,DCV-rfRFE,0.5154619250096637,14,19,NA,25
+Empirical,case_study_NEC,6,3,mbiome + meta_data,0.6064940085040588,22,26,NA,25
+Empirical,case_study_NEC,6,4,meta_alone,0.8397435897435898,6,5,NA,21
+Empirical,case_study_NEC,6,4,DCV-ridgeRegression,0.7713675213675214,12,19,NA,21
+Empirical,case_study_NEC,6,4,DCV-ridgeEnsemble,0.7569444444444445,12,19,NA,21
+Empirical,case_study_NEC,6,4,DCV-rfRFE,0.7916666666666667,9,12,NA,21
+Empirical,case_study_NEC,6,4,mbiome + meta_data,0.8279914529914529,11,10,NA,21
+Empirical,case_study_NEC,6,5,meta_alone,0.6209072978303748,11,10,NA,24
+Empirical,case_study_NEC,6,5,DCV-ridgeRegression,0.6571992110453649,18,28,NA,24
+Empirical,case_study_NEC,6,5,DCV-ridgeEnsemble,0.6579881656804734,18,28,NA,24
+Empirical,case_study_NEC,6,5,DCV-rfRFE,0.6366863905325444,12,17,NA,24
+Empirical,case_study_NEC,6,5,mbiome + meta_data,0.7072978303747535,23,27,NA,24
+Empirical,case_study_NEC,7,1,meta_alone,0.5782476024411508,6,5,NA,24
+Empirical,case_study_NEC,7,1,DCV-ridgeRegression,0.5592850915431561,18,23,NA,24
+Empirical,case_study_NEC,7,1,DCV-ridgeEnsemble,0.44027898866608545,18,23,NA,24
+Empirical,case_study_NEC,7,1,DCV-rfRFE,0.4224062772449869,16,19,NA,24
+Empirical,case_study_NEC,7,1,mbiome + meta_data,0.6026591107236269,12,11,NA,24
+Empirical,case_study_NEC,7,2,meta_alone,0.7119487908961593,11,10,NA,21
+Empirical,case_study_NEC,7,2,DCV-ridgeRegression,0.5120910384068278,16,20,NA,21
+Empirical,case_study_NEC,7,2,DCV-ridgeEnsemble,0.5807254623044097,16,20,NA,21
+Empirical,case_study_NEC,7,2,DCV-rfRFE,0.6269559032716927,8,6,NA,21
+Empirical,case_study_NEC,7,2,mbiome + meta_data,0.6073968705547652,18,15,NA,21
+Empirical,case_study_NEC,7,3,meta_alone,0.46733831654208646,7,6,NA,25
+Empirical,case_study_NEC,7,3,DCV-ridgeRegression,0.4731881702957426,19,31,NA,25
+Empirical,case_study_NEC,7,3,DCV-ridgeEnsemble,0.49496262593435164,19,31,NA,25
+Empirical,case_study_NEC,7,3,DCV-rfRFE,0.4917127071823204,16,19,NA,25
+Empirical,case_study_NEC,7,3,mbiome + meta_data,0.48066298342541436,10,10,NA,25
+Empirical,case_study_NEC,7,4,meta_alone,0.7058208434994772,8,7,NA,21
+Empirical,case_study_NEC,7,4,DCV-ridgeRegression,0.6603346113628442,16,28,NA,21
+Empirical,case_study_NEC,7,4,DCV-ridgeEnsemble,0.6662600209132101,16,28,NA,21
+Empirical,case_study_NEC,7,4,DCV-rfRFE,0.6843848030672708,15,24,NA,21
+Empirical,case_study_NEC,7,4,mbiome + meta_data,0.6350644823980481,13,11,NA,21
+Empirical,case_study_NEC,7,5,meta_alone,0.5326651154465725,16,15,NA,22
+Empirical,case_study_NEC,7,5,DCV-ridgeRegression,0.8133166278861643,8,10,NA,22
+Empirical,case_study_NEC,7,5,DCV-ridgeEnsemble,0.8029353857168426,8,10,NA,22
+Empirical,case_study_NEC,7,5,DCV-rfRFE,0.8013245033112583,8,10,NA,22
+Empirical,case_study_NEC,7,5,mbiome + meta_data,0.8679076427420798,12,12,NA,22
+Empirical,case_study_NEC,8,1,meta_alone,0.3441039307128581,11,10,NA,22
+Empirical,case_study_NEC,8,1,DCV-ridgeRegression,0.6538974017321786,16,30,NA,22
+Empirical,case_study_NEC,8,1,DCV-ridgeEnsemble,0.5932711525649567,16,30,NA,22
+Empirical,case_study_NEC,8,1,DCV-rfRFE,0.5916055962691539,16,28,NA,22
+Empirical,case_study_NEC,8,1,mbiome + meta_data,0.5562958027981345,24,35,NA,22
+Empirical,case_study_NEC,8,2,meta_alone,0.6455314009661836,6,5,NA,22
+Empirical,case_study_NEC,8,2,DCV-ridgeRegression,0.6228864734299517,16,21,NA,22
+Empirical,case_study_NEC,8,2,DCV-ridgeEnsemble,0.6403985507246377,16,21,NA,22
+Empirical,case_study_NEC,8,2,DCV-rfRFE,0.6564009661835749,10,11,NA,22
+Empirical,case_study_NEC,8,2,mbiome + meta_data,0.7563405797101449,12,11,NA,22
+Empirical,case_study_NEC,8,3,meta_alone,0.5032978183663115,12,11,NA,22
+Empirical,case_study_NEC,8,3,DCV-ridgeRegression,0.7453069507864029,16,24,NA,22
+Empirical,case_study_NEC,8,3,DCV-ridgeEnsemble,0.6702181633688483,16,24,NA,22
+Empirical,case_study_NEC,8,3,DCV-rfRFE,0.6552511415525114,14,15,NA,22
+Empirical,case_study_NEC,8,3,mbiome + meta_data,0.7293252156265855,26,26,NA,22
+Empirical,case_study_NEC,8,4,meta_alone,0.7162393162393162,8,7,NA,24
+Empirical,case_study_NEC,8,4,DCV-ridgeRegression,0.6666666666666666,14,23,NA,24
+Empirical,case_study_NEC,8,4,DCV-ridgeEnsemble,0.581973581973582,14,23,NA,24
+Empirical,case_study_NEC,8,4,DCV-rfRFE,0.6285936285936286,7,9,NA,24
+Empirical,case_study_NEC,8,4,mbiome + meta_data,0.8116550116550116,10,11,NA,24
+Empirical,case_study_NEC,8,5,meta_alone,0.703926282051282,8,7,NA,22
+Empirical,case_study_NEC,8,5,DCV-ridgeRegression,0.7596153846153846,12,16,NA,22
+Empirical,case_study_NEC,8,5,DCV-ridgeEnsemble,0.7548076923076923,12,16,NA,22
+Empirical,case_study_NEC,8,5,DCV-rfRFE,0.7724358974358975,8,11,NA,22
+Empirical,case_study_NEC,8,5,mbiome + meta_data,0.7644230769230769,12,12,NA,22
+Empirical,case_study_NEC,9,1,meta_alone,0.6617142857142857,6,5,NA,23
+Empirical,case_study_NEC,9,1,DCV-ridgeRegression,0.7709714285714285,17,18,NA,23
+Empirical,case_study_NEC,9,1,DCV-ridgeEnsemble,0.7449142857142858,17,18,NA,23
+Empirical,case_study_NEC,9,1,DCV-rfRFE,0.7611428571428571,12,12,NA,23
+Empirical,case_study_NEC,9,1,mbiome + meta_data,0.7650285714285714,15,13,NA,23
+Empirical,case_study_NEC,9,2,meta_alone,0.7582076308784383,8,7,NA,22
+Empirical,case_study_NEC,9,2,DCV-ridgeRegression,0.7076308784383318,16,26,NA,22
+Empirical,case_study_NEC,9,2,DCV-ridgeEnsemble,0.6657054125998225,16,26,NA,22
+Empirical,case_study_NEC,9,2,DCV-rfRFE,0.6901064773735581,15,20,NA,22
+Empirical,case_study_NEC,9,2,mbiome + meta_data,0.6765749778172139,19,21,NA,22
+Empirical,case_study_NEC,9,3,meta_alone,0.6625,11,10,NA,23
+Empirical,case_study_NEC,9,3,DCV-ridgeRegression,0.6568548387096774,17,35,NA,23
+Empirical,case_study_NEC,9,3,DCV-ridgeEnsemble,0.6915322580645161,17,35,NA,23
+Empirical,case_study_NEC,9,3,DCV-rfRFE,0.697983870967742,15,24,NA,23
+Empirical,case_study_NEC,9,3,mbiome + meta_data,0.6806451612903226,18,23,NA,23
+Empirical,case_study_NEC,9,4,meta_alone,0.5006421232876712,11,10,NA,22
+Empirical,case_study_NEC,9,4,DCV-ridgeRegression,0.5639982876712328,16,19,NA,22
+Empirical,case_study_NEC,9,4,DCV-ridgeEnsemble,0.4798801369863014,16,19,NA,22
+Empirical,case_study_NEC,9,4,DCV-rfRFE,0.5252568493150684,9,10,NA,22
+Empirical,case_study_NEC,9,4,mbiome + meta_data,0.4449914383561644,18,18,NA,22
+Empirical,case_study_NEC,9,5,meta_alone,0.7768886043533931,8,7,NA,21
+Empirical,case_study_NEC,9,5,DCV-ridgeRegression,0.8873239436619719,8,11,NA,21
+Empirical,case_study_NEC,9,5,DCV-ridgeEnsemble,0.867797695262484,8,11,NA,21
+Empirical,case_study_NEC,9,5,DCV-rfRFE,0.8437900128040973,6,5,NA,21
+Empirical,case_study_NEC,9,5,mbiome + meta_data,0.8860435339308579,13,11,NA,21
+Empirical,case_study_NEC,10,1,meta_alone,0.5615763546798029,11,10,NA,20
+Empirical,case_study_NEC,10,1,DCV-ridgeRegression,0.5640394088669951,15,17,NA,20
+Empirical,case_study_NEC,10,1,DCV-ridgeEnsemble,0.5127630989699955,15,17,NA,20
+Empirical,case_study_NEC,10,1,DCV-rfRFE,0.6762203313927452,9,9,NA,20
+Empirical,case_study_NEC,10,1,mbiome + meta_data,0.6350201522615315,15,13,NA,20
+Empirical,case_study_NEC,10,2,meta_alone,0.4027777777777778,8,7,NA,23
+Empirical,case_study_NEC,10,2,DCV-ridgeRegression,0.7180555555555556,17,31,NA,23
+Empirical,case_study_NEC,10,2,DCV-ridgeEnsemble,0.765625,17,31,NA,23
+Empirical,case_study_NEC,10,2,DCV-rfRFE,0.7642361111111111,13,21,NA,23
+Empirical,case_study_NEC,10,2,mbiome + meta_data,0.6388888888888888,16,19,NA,23
+Empirical,case_study_NEC,10,3,meta_alone,0.6570434782608695,7,6,NA,22
+Empirical,case_study_NEC,10,3,DCV-ridgeRegression,0.7248695652173913,16,22,NA,22
+Empirical,case_study_NEC,10,3,DCV-ridgeEnsemble,0.7036521739130435,16,22,NA,22
+Empirical,case_study_NEC,10,3,DCV-rfRFE,0.7151304347826087,13,17,NA,22
+Empirical,case_study_NEC,10,3,mbiome + meta_data,0.7266086956521739,13,14,NA,22
+Empirical,case_study_NEC,10,4,meta_alone,0.7462626262626263,11,10,NA,22
+Empirical,case_study_NEC,10,4,DCV-ridgeRegression,0.7935353535353535,16,19,NA,22
+Empirical,case_study_NEC,10,4,DCV-ridgeEnsemble,0.7961616161616162,16,19,NA,22
+Empirical,case_study_NEC,10,4,DCV-rfRFE,0.7911111111111111,8,7,NA,22
+Empirical,case_study_NEC,10,4,mbiome + meta_data,0.8303030303030303,16,14,NA,22
+Empirical,case_study_NEC,10,5,meta_alone,0.6745642701525054,7,6,NA,23
+Empirical,case_study_NEC,10,5,DCV-ridgeRegression,0.5321350762527233,13,15,NA,23
+Empirical,case_study_NEC,10,5,DCV-ridgeEnsemble,0.47984749455337694,13,15,NA,23
+Empirical,case_study_NEC,10,5,DCV-rfRFE,0.4866557734204793,9,10,NA,23
+Empirical,case_study_NEC,10,5,mbiome + meta_data,0.565359477124183,16,16,NA,23

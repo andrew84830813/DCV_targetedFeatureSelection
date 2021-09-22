@@ -497,6 +497,10 @@ for(sd in 1:5){
 }
 
 
+
+write_csv(x = benchmark,file = paste0("Results/",f_name,".csv"))
+
+
 # res = benchmark %>% 
 #   group_by(Approach,Dataset) %>% 
 #   summarise_all(mean) %>% 
