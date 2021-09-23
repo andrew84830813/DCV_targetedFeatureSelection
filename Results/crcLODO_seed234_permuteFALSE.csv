@@ -1,0 +1,7 @@
+Scenario,Dataset,Seed,Fold,Approach,AUC,number_parts,number_ratios,comp_time,base_dims
+Empirical,crcLODO_seed234_permuteFALSE,234,2,DCV-ridgeRegression,0.809379070777247,166,944,NA,221
+Empirical,crcLODO_seed234_permuteFALSE,234,2,DCV-ridgeEnsemble,0.852783326096396,166,944,NA,221
+Empirical,crcLODO_seed234_permuteFALSE,234,2,DCV-rfRFE,0.8497611810681719,135,430,NA,221
+Empirical,crcLODO_seed234_permuteFALSE,234,2,DCV-ridgeRegression,0.7545995321114939,89,649,NA,236
+Empirical,crcLODO_seed234_permuteFALSE,234,2,DCV-ridgeEnsemble,0.7847654091673231,89,649,NA,236
+Empirical,crcLODO_seed234_permuteFALSE,234,2,DCV-rfRFE,0.7820909208469017,78,346,NA,236
