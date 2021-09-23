@@ -226,10 +226,11 @@ for(f in 1:k_fold){
   )
   
   perf = data.frame(Scenario = if_else(permute_labels,"Permuted","Empirical"),
-                    Dataset = f_name,Seed = sd,Fold = f,Approach = tar_dcv$Performance$Approach,AUC = as.numeric(tar_dcv$Performance$AUC),
+                    Dataset = f_name,Seed = sd,Fold = f,
+                    Approach = tar_dcv$Performance$Approach,AUC = as.numeric(tar_dcv$Performance$AUC),
                     number_parts = tar_dcv$Performance$number_parts,number_ratios = tar_dcv$Performance$number_ratios ,
                     comp_time = tar_dcv$Performance$comp_time,
-                    base_dims = ncol(train.data)
+                    base_dims = ncol(trainx)
   )
   benchmark = rbind(benchmark,perf)
   
