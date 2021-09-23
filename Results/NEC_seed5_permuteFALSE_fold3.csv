@@ -1,0 +1,8 @@
+Scenario,Dataset,Seed,Fold,Approach,AUC,number_parts,number_ratios,comp_time,base_dims
+Empirical,NEC_seed5_permuteFALSE_fold3,5,3,meta_aloneRFE,0.5900673400673401,6,5,NA,23
+Empirical,NEC_seed5_permuteFALSE_fold3,5,3,meta_dataGLM,0.5771604938271605,2,5,NA,5
+Empirical,NEC_seed5_permuteFALSE_fold3,5,3,mbiome_DCV-ridgeRegression,0.7365319865319865,17,31,NA,5
+Empirical,NEC_seed5_permuteFALSE_fold3,5,3,mbiome_DCV-ridgeEnsemble,0.7079124579124579,17,31,NA,5
+Empirical,NEC_seed5_permuteFALSE_fold3,5,3,mbiome_DCV-rfRFE,0.723625140291807,11,14,NA,5
+Empirical,NEC_seed5_permuteFALSE_fold3,5,3,mbiome + meta_dataRFE,0.6130751964085297,17,19,NA,5
+Empirical,NEC_seed5_permuteFALSE_fold3,5,3,mbiome + meta_dataGLM,0.5771604938271605,2,36,NA,36
