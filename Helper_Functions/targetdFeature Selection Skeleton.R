@@ -149,6 +149,7 @@ targeted_dcvSelection = function(trainx,
     
     ## make predictions
     p = stats::predict(cv.clrlasso, newx = as.matrix(glm.test), s = "lambda.min",type = "response")
+    model_ = list(mdl = cv.clrlasso,data = list(train = glm.train,test = glm.test))
     if(type_family=="binomial"){
       mroc = pROC::roc(y_test,p)
       mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
@@ -191,6 +192,9 @@ targeted_dcvSelection = function(trainx,
       test_data2 = sweep(test_data2,MARGIN = 2,STATS = feat.df$coef,FUN = "*")  
       
     }
+    
+    weight.train = train_data2
+    weight.test = test_data2
     
     ## Train Model
     ph = trainML_Models(trainLRs = train_data2,
@@ -286,7 +290,8 @@ targeted_dcvSelection = function(trainx,
     
     
     return(list(Performance = result,all_model_preds = ph$predictionMatrix,
-                weighted_features = list(train = train_data2,test = test_data2),
+                glm_model = model_,
+                weighted_features = list(train = weight.train,test = weight.test),
                 part_matrices = list(train = train_subcomp,test = test_subcomp),
                 ridge_coefficients = c,probMatrices  = prob_matrices,
                 final_dcv = dcv, 

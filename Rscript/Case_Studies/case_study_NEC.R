@@ -11,11 +11,7 @@ library(readr)
 library(tidyr)
 library(stringr)
 library(glmnet) # glmnet
-library(selbal) # selbal
 
-
-
-#setwd("/nas/longleaf/home/andrew84/rProjects/DiCoVarFS_project")
 
 
 # Load Helper Functions  ---------------------------------------------------------------
@@ -24,228 +20,268 @@ for(f in fnames){
   source(paste0("Helper_Functions/",f))
 }
 
-
-
 # Setup Cluster ---------------------------------------------------------------
 
 ## Detect Cores
-clus <- parallel::makeCluster(10)
-doParallel::registerDoParallel(clus)
+# clus <- parallel::makeCluster(10)
+# doParallel::registerDoParallel(clus)
 
 
 
 
 # Read External Args ---------------------------------------------------------------
 
-args = c(2,5,0)
+args = c(2,3,0)
 args = commandArgs(trailingOnly = TRUE)
 sd = as.numeric(args[1]) # random seed selection
-f = as.numeric(args[2])
+f = as.numeric(args[2]) # random seed selection
 permute_labels = as.logical(as.numeric(args[3])) #should be 0(False) or 1(True)
 
 
 ## set random seed
 set.seed(sd)
-###-------------------------------------------------------*
-#### NEC ####
-###-------------------------------------------------------*
-metaData = data.frame(readr::read_tsv(file = "Data/NICUNEC.WGS.sample_details.tsv"))
-otuData = data.frame(readr::read_tsv(file = "Data/NICUNEC.WGS.taxon_abundance.tsv"))
+
+## Name Iteration
+f_name = paste0("NEC_seed",sd,"_permute",permute_labels,"_fold",f)
+
+## read data
+load("Output/microbiomeDB_dataAtLeast7DaysBeforeNEC.Rda")
+df = exp$mbiome
+md1 = exp$metadata
+
+## Get fold matrix
+folds_matrix = data.frame(read_csv(file = "Output/commonFolds_NEC_crossValidation.csv"))
 
 
-## Filter NEC samples for NEC  in the that occurs a least a week from now
-metaData1 = metaData %>% 
-  filter(Days.of.period.NEC.diagnosed<=-7 ) %>% 
-  filter(Age.at.sample.collection..days.>0) 
+## Partition data
+allData = lodo_partition(df,dataset_labels = folds_matrix[,sd],sd)
 
-## Control Samples
-metaData2 = metaData %>% 
-  filter(is.na(Days.of.period.NEC.diagnosed)) %>% 
-  filter(Age.at.sample.collection..days. < max(metaData1$Age.at.sample.collection..days.)) 
-hist(metaData2$Age.at.sample.collection..days.)
-hist(metaData1$Age.at.sample.collection..days.)
-
-
-## Merge Samples
-set.seed(08272008)
-metaData3 = metaData2
-md1 = rbind(metaData1,metaData3)
-md = data.frame(X1 = md1$X1,Status = md1$Necrotizing.enterocolitis)
-table(md$Status)
-table(md1$Days.of.period.NEC.diagnosed)
-hist(md1$Age.at.sample.collection..days.)
-samples =md1 %>% 
-  group_by(Subject.ID,Necrotizing.enterocolitis) %>% 
-  summarise(n = n())
-
-#Pre Process OTU Data
-otuData = subset(otuData,select = c("X1",metaData$X1))
-## Sep
-otuData1 = tidyr::separate(otuData,col = 1,
-                           into = c("Kingdom","Phylum","Class","Order",
-                                    "Family","Genus","Species","fhfhf"),
-                           remove = F,sep = ";")
-
-## retain taxa  with Genus level
-otuData1 = otuData1[!is.na(otuData1$Genus),]
-otuData1 = otuData1 %>% 
-  select(Genus,starts_with("SRR"))
-otuData1[is.na(otuData1)] = 0
-otuData1 = tidyr::gather(otuData1,"SampleID","Counts",2:ncol(otuData1))
-otuData1 = otuData1 %>% 
-  dplyr::group_by(SampleID,Genus) %>% 
-  dplyr::summarise(counts = sum(Counts))
-otuData1 = tidyr::spread(otuData1,key = "Genus","counts",fill = 0)
-colnames(otuData1)[1] = c("X1")
-
-
-## Append Metadata
-otuData1 = left_join(md,otuData1)
-df = data.frame(Status = otuData1$Status,otuData1[,-2:-1],row.names = otuData1$X1)
-
-
-
-
-
+##Define Out Data frame
 benchmark = data.frame()
-permute_labels = F
-f_name= "case_study_NEC"
 
-for(sd in 1:10){
-  set.seed(sd)
+
+message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
+
+## Compute Performance for the f - th fold
+
+  ## Extract Test/Train Split
+  ttData = DiCoVarML::extractTrainTestSplit(foldDataList = allData,
+                                            fold = f,
+                                            maxSparisty = .9,
+                                            permLabels = permute_labels,
+                                            extractTelAbunance = F)
+  ##get train test partitions
+  train.data = ttData$train_Data
+  test.data = ttData$test_data
+  ## Compute Total Parts
+  number_parts = ncol(train.data);number_parts
+  nsamps = nrow(train.data)
+  table(ttData$y_test)
+  classes = as.character(unique(ttData$y_train))
   
-  ## Partition Data
-  k_fold = 5
-  ##strat by sample and label
-  overll_folds = caret::createFolds(samples$Necrotizing.enterocolitis,k =k_fold,list = F)
-  samples1 = samples
-  samples1$fold = overll_folds
-  samples1 = left_join(md1,samples1)
+  ##get metadata
+  train.md = data.frame(X1 = rownames(train.data))
+  train.md = left_join(train.md,md1)
+  test.md = data.frame(X1 = rownames(test.data))
+  test.md = left_join(test.md,md1)
+  y_label = ttData$y_train
+
   
-  allData = lodo_partition(df,dataset_labels = samples1$fold,sd)
+ ## Pre-Process Metadata
+  mm.char = train.md %>% 
+    select(Sex,
+           Chorioamnionitis,
+           Maternal.antepartum.antibiotics.administered,
+           Baby.s.delivery.mode,
+           Born.stunted,
+           Host.diet)
+  mm.char.test = subset(test.md,select = colnames(mm.char))
+  ##-----------------------------
+  ## Add covairate
+  ## cat features
+  dummy <- dummyVars(" ~ .", data=rbind(mm.char,mm.char.test))
+  newdata <- data.frame(predict(dummy, newdata = rbind(mm.char,mm.char.test)))
+  newdata.train = newdata[1:nrow(mm.char),]
+  newdata.test =  newdata[-1:-nrow(mm.char),]
   
-  message("\n\n``````` Start Seed:  ",sd,"````````````\n\n")
   
-  #  Perform 2-fold cross validation -------------------------------
+  ## cont features
+  train_metadata = data.frame(Age = train.md$Age.at.sample.collection..days.,
+                             gesAge = train.md$Gestational.age.at.birth..days.,
+                             host_weight = train.md$Host.weight..g.,
+                             newdata.train
+  )
   
-  for(f in 1:k_fold){
+  
+  test.metadata = data.frame(Age = test.md$Age.at.sample.collection..days.,
+                             gesAge = test.md$Gestational.age.at.birth..days.,
+                             host_weight = test.md$Host.weight..g.,
+                             newdata.test
+  )
+
+  
+  
+  # RFE - Metadata --------------------------------------------------------------------
+  ensemble = c("ranger","pls","svmRadial","glmnet","rangerE")
+  message("Compute Performance - Metadata Alone RFE")
+  suppressMessages(suppressWarnings({
+
+    compTime2 = system.time({
+      pp = rfeSelection.ByMetric(train_ratio = train_metadata,
+                                 test_ratio = test.metadata,
+                                 ytrain =y_label,
+                                 ntrees = 750,
+                                 sets = 10,
+                                 impMeasure = "impurity_corrected",
+                                 kfold = 5,
+                                 minPercentFeatReturn = .3)
+    })
+    train_data.meta = pp$reducedTrainRatios
+    test_data.meta = pp$reducedTestRatio
+    message("number of features = ",ncol(train_data.meta))
+    keep.meta = colnames(train_data.meta)
     
-    ## Extract Test/Train Splilt
-    ttData = DiCoVarML::extractTrainTestSplit(foldDataList = allData,
-                                              fold = f,
-                                              maxSparisty = .9,
-                                              extractTelAbunance = F)
-    ##get train test paritions
-    train.data = ttData$train_Data
-    test.data = ttData$test_data
-    ## Compute Total Parts
-    number_parts = ncol(train.data);number_parts
-    nsamps = nrow(train.data)
-    table(ttData$y_test)
-    classes = as.character(unique(ttData$y_train))
     
-    ##get metadata
-    train.md = data.frame(X1 = rownames(train.data))
-    train.md = left_join(train.md,md1)
-    test.md = data.frame(X1 = rownames(test.data))
-    test.md = left_join(test.md,md1)
+    ## Train Model
+    ph = trainML_Models(trainLRs = train_data.meta,
+                        testLRs = test_data.meta,
+                        ytrain = y_label,
+                        y_test = ttData$y_test,
+                        testIDs = ttData$test_ids,
+                        models = ensemble) 
+    
+    ## Compute Performance
+    geo.mean = function(x){
+      exp(mean(log(x)))
+    }
+    pmat = ph$predictionMatrix
+    pmat = pmat %>% 
+      group_by(ID,Status) %>% 
+      dplyr::select(-model) %>% 
+      summarise_all(.funs = mean)
+    pmat = data.frame(pmat)
+    mroc = pROC::multiclass.roc(pmat$Status,pmat[,classes]);mroc
+    
+    
+    ## Compute Number of Part
+    cn = colnames(train_data.meta)
+    n_ratios = length(cn)
+    uniqueParts = unique(as.vector(stringr::str_split(cn,"___",2,simplify = T)))
+    n_parts  = dplyr::n_distinct(uniqueParts)
+    
+    ## Save Performance
+    perf = data.frame(Scenario = if_else(permute_labels,"Permuted","Empirical"),
+                      Dataset = f_name,Seed = sd,Fold = f,Approach = "meta_aloneRFE",AUC = as.numeric(pROC::auc(mroc)),
+                      number_parts = n_parts,number_ratios = ncol(train_data.meta) ,comp_time = NA,
+                      base_dims = ncol(train.data))
+    benchmark = rbind(benchmark,perf)
+  }))
+  
+  
+  # GLM - Mbiome + Meta --------------------------------------------------------------------
+  message("Compute Performance - Metadata Alone GLM")
+  suppressMessages(suppressWarnings({
+    
+    
+    ## retrieve test and train data
+    train.data = cbind(train_data.meta)
+    test.data = cbind(test_data.meta)
     y_label = ttData$y_train
-
-    
-   ## Pre-Process Metadata
-    mm.char = train.md %>% 
-      select(Sex,
-             Chorioamnionitis,
-             Maternal.antepartum.antibiotics.administered,
-             Baby.s.delivery.mode,
-             Born.stunted,
-             Host.diet)
-    mm.char.test = subset(test.md,select = colnames(mm.char))
-    ##-----------------------------
-    ## Add covairate
-    ## cat features
-    dummy <- dummyVars(" ~ .", data=rbind(mm.char,mm.char.test))
-    newdata <- data.frame(predict(dummy, newdata = rbind(mm.char,mm.char.test)))
-    newdata.train = newdata[1:nrow(mm.char),]
-    newdata.test =  newdata[-1:-nrow(mm.char),]
+    y_test = ttData$y_test
     
     
-    ## cont features
-    train_metadata = data.frame(Age = train.md$Age.at.sample.collection..days.,
-                               gesAge = train.md$Gestational.age.at.birth..days.,
-                               host_weight = train.md$Host.weight..g.,
-                               newdata.train
-    )
-    
-    
-    test.metadata = data.frame(Age = test.md$Age.at.sample.collection..days.,
-                               gesAge = test.md$Gestational.age.at.birth..days.,
-                               host_weight = test.md$Host.weight..g.,
-                               newdata.test
-    )
-    
-    
-    
-  
-    
-    
-    # RFE - Metadata --------------------------------------------------------------------
-    ensemble = c("ranger","pls","svmRadial","glmnet","rangerE")
-    suppressMessages(suppressWarnings({
-  
-      compTime2 = system.time({
-        pp = rfeSelection.ByMetric(train_ratio = train_metadata,
-                                   test_ratio = test.metadata,
-                                   ytrain =y_label,
-                                   ntrees = 750,
-                                   sets = 10,
-                                   impMeasure = "impurity_corrected",
-                                   kfold = 5,
-                                   minPercentFeatReturn = .3)
-      })
-      train_data.meta = pp$reducedTrainRatios
-      test_data.meta = pp$reducedTestRatio
-      message("number of features = ",ncol(train_data.meta))
-      keep.meta = colnames(train_data.meta)
-      
-      
-      ## Train Model
-      ph = trainML_Models(trainLRs = train_data.meta,
-                          testLRs = test_data.meta,
-                          ytrain = y_label,
-                          y_test = ttData$y_test,
-                          testIDs = ttData$test_ids,
-                          models = ensemble) 
-      
-      ## Compute Performance
-      geo.mean = function(x){
-        exp(mean(log(x)))
+    ## Apply Penalized Regression
+    ## Tune Alpha
+    type_family = if_else(length(classes)>2,"multinomial","binomial")
+    infld = 2
+    flds = caret::createFolds(y = y_label,k = infld,list = F)
+    compTime2 = system.time({
+      aseq = seq(1e-3,1,length.out = 10)
+      min_dev =  foreach(a = aseq,.combine = rbind)%dopar%{
+        
+        aucc = c()
+        for(f in 1:infld){
+          bool  = flds==f
+          compTime2 = system.time({
+            cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data[bool,]),y_label[bool], 
+                                             standardize=F, alpha=a,family=type_family)
+          })
+          
+          ## make predictions
+          p = predict(cv.clrlasso, newx = as.matrix(train.data[!bool,]), s = "lambda.min",type = "response")
+          if(type_family=="binomial"){
+            mroc = pROC::roc(y_label[!bool],p)
+            mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+          }else{
+            ## multiclass
+            mroc = pROC::multiclass.roc(y_label[!bool],p[,,1])
+            mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+          }
+          aucc = c(aucc,as.numeric(mroc.dcvlasso))
+        }
+        data.frame(a,auc = mean(aucc))
       }
-      pmat = ph$predictionMatrix
-      pmat = pmat %>% 
-        group_by(ID,Status) %>% 
-        dplyr::select(-model) %>% 
-        summarise_all(.funs = mean)
-      pmat = data.frame(pmat)
-      mroc = pROC::multiclass.roc(pmat$Status,pmat[,classes]);mroc
-      
-      
-      ## Compute Number of Part
-      cn = colnames(train_data.meta)
-      n_ratios = length(cn)
-      uniqueParts = unique(as.vector(stringr::str_split(cn,"___",2,simplify = T)))
-      n_parts  = dplyr::n_distinct(uniqueParts)
-      
-      ## Save Performance
-      perf = data.frame(Scenario = if_else(permute_labels,"Permuted","Empirical"),
-                        Dataset = f_name,Seed = sd,Fold = f,Approach = "meta_alone",AUC = as.numeric(pROC::auc(mroc)),
-                        number_parts = n_parts,number_ratios = ncol(train_data.meta) ,comp_time = NA,
-                        base_dims = ncol(train.data))
-      benchmark = rbind(benchmark,perf)
-    }))
+    })
+    min_dev = min_dev %>% 
+      arrange(desc(auc))
+    
+    ## Train GLM
+    compTime2 = system.time({
+      cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data),y_label, standardize=F, alpha = min_dev$a[1],family=type_family)
+    })
+    if(type_family=="binomial"){
+      features = as.matrix(coef(cv.clrlasso, s = "lambda.min"))
+      features = features[-1,]
+      features = features[abs(features)>0]
+      length(features)
+      c = as.matrix(coef(cv.clrlasso, s = "lambda.min"))[-1,]
+    }else{
+      features = as.matrix(stats::coef(cv.clrlasso, s = "lambda.min"))
+      feat.df = data.frame()
+      for(o in 1:length(features)){
+        ph = as.matrix(features[[o]])
+        feat = ph[-1,]
+        keep = feat[abs(feat)>0]
+        feat.df = rbind(feat.df,data.frame(Ratio = names(keep),coef = as.numeric(keep)))
+      }
+      feat.df =feat.df %>% 
+        group_by(Ratio) %>% 
+        summarise(coef = sum(coef)) %>% 
+        filter(coef!=0)
+    }
+    
+    ## make predictions
+    p = predict(cv.clrlasso, newx = as.matrix(test.data), s = "lambda.min",type = "response")
+    if(type_family=="binomial"){
+      mroc = pROC::roc(ttData$y_test,p)
+      mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+    }else{
+      ## multiclass
+      mroc = pROC::multiclass.roc(ttData$y_test,p[,,1])
+      mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+    }
+    
+    ## Compute Number of Part
+    cn =names(c[abs(c)>0])
+    n_ratios = length(cn)
+    uniqueParts = unique(as.vector(stringr::str_split(cn,"___",2,simplify = T)))
+    n_parts  = dplyr::n_distinct(uniqueParts)
+    
+    ## Save Performance
+    perf = data.frame(Scenario = if_else(permute_labels,"Permuted","Empirical"),
+                      Dataset = f_name,Seed = sd,Fold = f,Approach = "meta_dataGLM",
+                      AUC = as.numeric(pROC::auc(mroc)),
+                      number_parts = n_parts,number_ratios = ncol(train.data) ,comp_time = NA,
+                      base_dims = ncol(train.data))
+    benchmark = rbind(benchmark,perf)
     
     
-    # RFE - Mbiome --------------------------------------------------------------------
+  }))
+  
+  
+  # RFE - Mbiome --------------------------------------------------------------------
+  message("Compute Performance - Mbiome Target DCV")
+  suppressMessages(suppressWarnings({
     
     perc_totalParts2Keep = .75
     num_sets = 5
@@ -259,7 +295,6 @@ for(sd in 1:10){
     
     
     ensemble = c("ranger","pls","svmRadial","glmnet","rangerE")
-    #ensemble = c("ranger","xgbTree","xgbLinear")
     max_sparsity = .9
     
     
@@ -373,115 +408,181 @@ for(sd in 1:10){
     )
     
     perf = data.frame(Scenario = if_else(permute_labels,"Permuted","Empirical"),
-                      Dataset = f_name,Seed = sd,Fold = f,Approach = tar_dcv$Performance$Approach,AUC = as.numeric(tar_dcv$Performance$AUC),
+                      Dataset = f_name,Seed = sd,Fold = f,Approach = paste0("mbiome_",tar_dcv$Performance$Approach),AUC = as.numeric(tar_dcv$Performance$AUC),
                       number_parts = tar_dcv$Performance$number_parts,number_ratios = tar_dcv$Performance$number_ratios ,
                       comp_time = tar_dcv$Performance$comp_time,
                       base_dims = ncol(train.data)
     )
     benchmark = rbind(benchmark,perf)
+  
+  }))
+  
+  
+  # RFE - Mbiome + Meta --------------------------------------------------------------------
+  message("Compute Performance - Mbiome + Metadata RFE")
+  suppressMessages(suppressWarnings({
+   
+    
+    train_data2 = cbind(tar_dcv$rfe_features$train,train_data.meta)
+    test_data2 = cbind(tar_dcv$rfe_features$test,test_data.meta)
     
     
+    compTime2 = system.time({
+      pp = rfeSelection.ByMetric(train_ratio = train_data2,
+                                 test_ratio = test_data2,
+                                 ytrain =y_label,
+                                 ntrees = 750,
+                                 sets = 10,
+                                 impMeasure = "impurity_corrected",
+                                 kfold = 5,
+                                 minPercentFeatReturn = .3)
+    })
+    train_data2 = pp$reducedTrainRatios
+    test_data2 = pp$reducedTestRatio
+    message("number of features = ",ncol(train_data2))
+    
+    ## Train Model
+    ph = trainML_Models(trainLRs = train_data2,
+                        testLRs = test_data2,
+                        ytrain = y_label,
+                        y_test = ttData$y_test,
+                        testIDs = ttData$test_ids,
+                        models = ensemble) 
+    
+    ## Compute Performance
+    geo.mean = function(x){
+      exp(mean(log(x)))
+    }
+    pmat = ph$predictionMatrix
+    pmat = pmat %>% 
+      group_by(ID,Status) %>% 
+      dplyr::select(-model) %>% 
+      summarise_all(.funs = mean)
+    pmat = data.frame(pmat)
+    #pmat[,4:ncol(pmat)] = clo((pmat[,4:ncol(pmat)]))
+    mroc = pROC::multiclass.roc(pmat$Status,pmat[,classes]);mroc
     
     
-    # RFE - Mbiome + Meta --------------------------------------------------------------------
-    suppressMessages(suppressWarnings({
-     
-      
-      train_data2 = cbind(tar_dcv$rfe_features$train,train_data.meta)
-      test_data2 = cbind(tar_dcv$rfe_features$test,test_data.meta)
-      
-      
-      compTime2 = system.time({
-        pp = rfeSelection.ByMetric(train_ratio = train_data2,
-                                   test_ratio = test_data2,
-                                   ytrain =y_label,
-                                   ntrees = 750,
-                                   sets = 10,
-                                   impMeasure = "impurity_corrected",
-                                   kfold = 5,
-                                   minPercentFeatReturn = .3)
-      })
-      train_data2 = pp$reducedTrainRatios
-      test_data2 = pp$reducedTestRatio
-      message("number of features = ",ncol(train_data2))
-      
-      ## Train Model
-      ph = trainML_Models(trainLRs = train_data2,
-                          testLRs = test_data2,
-                          ytrain = y_label,
-                          y_test = ttData$y_test,
-                          testIDs = ttData$test_ids,
-                          models = ensemble) 
-      
-      ## Compute Performance
-      geo.mean = function(x){
-        exp(mean(log(x)))
-      }
-      pmat = ph$predictionMatrix
-      pmat = pmat %>% 
-        group_by(ID,Status) %>% 
-        dplyr::select(-model) %>% 
-        summarise_all(.funs = mean)
-      pmat = data.frame(pmat)
-      #pmat[,4:ncol(pmat)] = clo((pmat[,4:ncol(pmat)]))
-      mroc = pROC::multiclass.roc(pmat$Status,pmat[,classes]);mroc
-      
-      
-      ## Compute Number of Part
-      cn = colnames(train_data2)
-      n_ratios = length(cn)
-      uniqueParts = unique(as.vector(stringr::str_split(cn,"___",2,simplify = T)))
-      n_parts  = dplyr::n_distinct(uniqueParts)
-      
-      ## Save Performance
-      perf = data.frame(Scenario = if_else(permute_labels,"Permuted","Empirical"),
-                        Dataset = f_name,Seed = sd,Fold = f,Approach = "mbiome + meta_data",AUC = as.numeric(pROC::auc(mroc)),
-                        number_parts = n_parts,number_ratios = ncol(train_data2) ,comp_time = NA,
-                        base_dims = ncol(train.data))
-      benchmark = rbind(benchmark,perf)
-    }))
+    ## Compute Number of Part
+    cn = colnames(train_data2)
+    n_ratios = length(cn)
+    uniqueParts = unique(as.vector(stringr::str_split(cn,"___",2,simplify = T)))
+    n_parts  = dplyr::n_distinct(uniqueParts)
     
-    
-    
+    ## Save Performance
+    perf = data.frame(Scenario = if_else(permute_labels,"Permuted","Empirical"),
+                      Dataset = f_name,Seed = sd,Fold = f,Approach = "mbiome + meta_dataRFE",AUC = as.numeric(pROC::auc(mroc)),
+                      number_parts = n_parts,number_ratios = ncol(train_data2) ,comp_time = NA,
+                      base_dims = ncol(train.data))
+    benchmark = rbind(benchmark,perf)
+  }))
+  
+  
+  
+  # GLM - Mbiome + Meta --------------------------------------------------------------------
+  message("Compute Performance - Mbiome + Metadata GLM")
+  suppressMessages(suppressWarnings({
     
    
-  }
-}
+    ## retrieve test and train data
+    train.data = cbind(tar_dcv$weighted_features$train,train_data.meta)
+    test.data = cbind(tar_dcv$weighted_features$test,test_data.meta)
+    y_label = ttData$y_train
+    y_test = ttData$y_test
+    
+    
+    ## Apply Penalized Regression
+    ## Tune Alpha
+    type_family = if_else(length(classes)>2,"multinomial","binomial")
+    infld = 2
+    flds = caret::createFolds(y = y_label,k = infld,list = F)
+    compTime2 = system.time({
+      aseq = seq(1e-3,1,length.out = 10)
+      min_dev =  foreach(a = aseq,.combine = rbind)%dopar%{
+        
+        aucc = c()
+        for(f in 1:infld){
+          bool  = flds==f
+          compTime2 = system.time({
+            cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data[bool,]),y_label[bool], 
+                                             standardize=F, alpha=a,family=type_family)
+          })
+          
+          ## make predictions
+          p = predict(cv.clrlasso, newx = as.matrix(train.data[!bool,]), s = "lambda.min",type = "response")
+          if(type_family=="binomial"){
+            mroc = pROC::roc(y_label[!bool],p)
+            mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+          }else{
+            ## multiclass
+            mroc = pROC::multiclass.roc(y_label[!bool],p[,,1])
+            mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+          }
+          aucc = c(aucc,as.numeric(mroc.dcvlasso))
+        }
+        data.frame(a,auc = mean(aucc))
+      }
+    })
+    min_dev = min_dev %>% 
+      arrange(desc(auc))
+    
+    ## Train GLM
+    compTime2 = system.time({
+      cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data),y_label, standardize=F, alpha = min_dev$a[1],family=type_family)
+    })
+    if(type_family=="binomial"){
+      features = as.matrix(coef(cv.clrlasso, s = "lambda.min"))
+      features = features[-1,]
+      features = features[abs(features)>0]
+      length(features)
+      c = as.matrix(coef(cv.clrlasso, s = "lambda.min"))[-1,]
+    }else{
+      features = as.matrix(stats::coef(cv.clrlasso, s = "lambda.min"))
+      feat.df = data.frame()
+      for(o in 1:length(features)){
+        ph = as.matrix(features[[o]])
+        feat = ph[-1,]
+        keep = feat[abs(feat)>0]
+        feat.df = rbind(feat.df,data.frame(Ratio = names(keep),coef = as.numeric(keep)))
+      }
+      feat.df =feat.df %>% 
+        group_by(Ratio) %>% 
+        summarise(coef = sum(coef)) %>% 
+        filter(coef!=0)
+    }
+    
+    ## make predictions
+    p = predict(cv.clrlasso, newx = as.matrix(test.data), s = "lambda.min",type = "response")
+    if(type_family=="binomial"){
+      mroc = pROC::roc(ttData$y_test,p)
+      mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+    }else{
+      ## multiclass
+      mroc = pROC::multiclass.roc(ttData$y_test,p[,,1])
+      mroc.dcvlasso = pROC::auc(mroc);mroc.dcvlasso
+    }
+    
+    ## Compute Number of Part
+    cn =names(c[abs(c)>0])
+    n_ratios = length(cn)
+    uniqueParts = unique(as.vector(stringr::str_split(cn,"___",2,simplify = T)))
+    n_parts  = dplyr::n_distinct(uniqueParts)
+    
+    ## Save Performance
+    perf = data.frame(Scenario = if_else(permute_labels,"Permuted","Empirical"),
+                      Dataset = f_name,Seed = sd,Fold = f,Approach = "mbiome + meta_dataGLM",
+                      AUC = as.numeric(pROC::auc(mroc)),
+                      number_parts = n_parts,number_ratios = ncol(train.data) ,comp_time = NA,
+                      base_dims = ncol(train.data))
+    benchmark = rbind(benchmark,perf)
+    
+    
+  }))
+   
 
-write_csv(benchmark,file = "Results/case_studyNEC_results.csv")
 
-
-f <- function(x) {
-  r <- quantile(x, probs = c(0.10, 0.25, 0.5, 0.75, 0.90))
-  names(r) <- c("ymin", "lower", "middle", "upper", "ymax")
-  r
-}
-
- res = benchmark %>% 
-  group_by(Approach,Dataset) %>% 
-  summarise_all(mean)
-res = data.frame(res)
-
-res = benchmark %>% 
-  group_by(Approach,Dataset,Seed) %>% 
-  summarise_all(mean)
-
-
-res1 = benchmark %>% 
-  group_by(Approach,Dataset) %>% 
-  summarise_all(mean)
-
-ggplot(res,aes(Approach,AUC))+
-  stat_summary(fun.y  = mean,geom = "point")+
-  stat_summary(fun.data = mean_se,geom = "errorbar")
-  
-
-
-## kruskal test
-kw = spread(benchmark[,1:6],"Approach","AUC")
-kruskal.test(x = res$AUC,g = res$Approach)
-
-wilcox.test(x = kw$`mbiome + meta_data`,y = kw$`DCV-rfRFE`,paired = T,alternative = "two.sided")
-wilcox.test(x = kw$`DCV-ridgeEnsemble`,y = kw$`Coda-LASSO`,paired = T,alternative = "two.sided")
+## Write Performance Estimates
+write_csv(x = benchmark,file = paste0("Results/",f_name,".csv"))
+    
 
 

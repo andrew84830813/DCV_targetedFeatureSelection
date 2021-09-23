@@ -11,7 +11,6 @@ library(readr)
 library(tidyr)
 library(stringr)
 library(glmnet) # glmnet
-library(selbal) # selbal
 
 
 
@@ -24,118 +23,57 @@ for(f in fnames){
   source(paste0("Helper_Functions/",f))
 }
 
-
-
 # Setup Cluster ---------------------------------------------------------------
 
 ## Detect Cores
-clus <- parallel::makeCluster(10)
-doParallel::registerDoParallel(clus)
+# clus <- parallel::makeCluster(10)
+# doParallel::registerDoParallel(clus)
 
 
 
 
 # Read External Args ---------------------------------------------------------------
 
-args = c(2,5,0)
+args = c(2,2,0)
 args = commandArgs(trailingOnly = TRUE)
 sd = as.numeric(args[1]) # random seed selection
-f = as.numeric(args[2])
+f = as.numeric(args[2]) # random seed selection
 permute_labels = as.logical(as.numeric(args[3])) #should be 0(False) or 1(True)
 
 
 ## set random seed
 set.seed(sd)
-###-------------------------------------------------------*
-#### NEC ####
-###-------------------------------------------------------*
-metaData = data.frame(readr::read_tsv(file = "Data/NICUNEC.WGS.sample_details.tsv"))
-otuData = data.frame(readr::read_tsv(file = "Data/NICUNEC.WGS.taxon_abundance.tsv"))
+
+## Name Iteration
+f_name = paste0("NEC_seed",sd,"_permute",permute_labels,"_fold",f)
+
+## read data
+load("Output/microbiomeDB_dataAtLeast7DaysBeforeNEC.Rda")
+df = exp$mbiome
+md1 = exp$metadata
+
+## Get fold matrix
+folds_matrix = data.frame(read_csv(file = "Output/commonFolds_NEC_crossValidation.csv"))
 
 
-## Filter NEC samples for NEC  in the that occurs a least a week from now
-metaData1 = metaData %>% 
-  filter(Days.of.period.NEC.diagnosed<=-7 ) %>% 
-  filter(Age.at.sample.collection..days.>0) 
+## Partition data
+allData = lodo_partition(df,dataset_labels = folds_matrix[,sd],sd)
 
-## Control Samples
-metaData2 = metaData %>% 
-  filter(is.na(Days.of.period.NEC.diagnosed)) %>% 
-  filter(Age.at.sample.collection..days. < max(metaData1$Age.at.sample.collection..days.)) 
-hist(metaData2$Age.at.sample.collection..days.)
-hist(metaData1$Age.at.sample.collection..days.)
-
-
-## Merge Samples
-set.seed(08272008)
-metaData3 = metaData2
-md1 = rbind(metaData1,metaData3)
-md = data.frame(X1 = md1$X1,Status = md1$Necrotizing.enterocolitis)
-table(md$Status)
-table(md1$Days.of.period.NEC.diagnosed)
-hist(md1$Age.at.sample.collection..days.)
-samples =md1 %>% 
-  group_by(Subject.ID,Necrotizing.enterocolitis) %>% 
-  summarise(n = n())
-
-#Pre Process OTU Data
-otuData = subset(otuData,select = c("X1",metaData$X1))
-## Sep
-otuData1 = tidyr::separate(otuData,col = 1,
-                           into = c("Kingdom","Phylum","Class","Order",
-                                    "Family","Genus","Species","fhfhf"),
-                           remove = F,sep = ";")
-
-## retain taxa  with Genus level
-otuData1 = otuData1[!is.na(otuData1$Genus),]
-otuData1 = otuData1 %>% 
-  select(Genus,starts_with("SRR"))
-otuData1[is.na(otuData1)] = 0
-otuData1 = tidyr::gather(otuData1,"SampleID","Counts",2:ncol(otuData1))
-otuData1 = otuData1 %>% 
-  dplyr::group_by(SampleID,Genus) %>% 
-  dplyr::summarise(counts = sum(Counts))
-otuData1 = tidyr::spread(otuData1,key = "Genus","counts",fill = 0)
-colnames(otuData1)[1] = c("X1")
-
-
-## Append Metadata
-otuData1 = left_join(md,otuData1)
-df = data.frame(Status = otuData1$Status,otuData1[,-2:-1],row.names = otuData1$X1)
-
-
-
-
-
+##Define Out Data frame
 benchmark = data.frame()
-permute_labels = F
-f_name= "case_study_NEC"
 
-for(sd in 1:10){
-  set.seed(sd)
-  
-  ## Partition Data
-  k_fold = 5
-  ##strat by sample and label
-  overll_folds = caret::createFolds(samples$Necrotizing.enterocolitis,k =k_fold,list = F)
-  samples1 = samples
-  samples1$fold = overll_folds
-  samples1 = left_join(md1,samples1)
-  
-  allData = lodo_partition(df,dataset_labels = samples1$fold,sd)
-  
-  message("\n\n``````` Start Seed:  ",sd,"````````````\n\n")
-  
-  #  Perform 2-fold cross validation -------------------------------
-  
-  for(f in 1:k_fold){
-    
-    ## Extract Test/Train Splilt
+
+message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
+
+## Compute Performance for the f - th fold
+
+    ## Extract Test/Train Split
     ttData = DiCoVarML::extractTrainTestSplit(foldDataList = allData,
                                               fold = f,
                                               maxSparisty = .9,
+                                              permLabels = permute_labels,
                                               extractTelAbunance = F)
-    ##get train test paritions
+    ##get train test partitions
     train.data = ttData$train_Data
     test.data = ttData$test_data
     ## Compute Total Parts
@@ -259,7 +197,6 @@ for(sd in 1:10){
     
     
     ensemble = c("ranger","pls","svmRadial","glmnet","rangerE")
-    #ensemble = c("ranger","xgbTree","xgbLinear")
     max_sparsity = .9
     
     
@@ -445,43 +382,45 @@ for(sd in 1:10){
     
     
    
-  }
-}
+  #}
+#}
 
-write_csv(benchmark,file = "Results/case_studyNEC_results.csv")
-
-
-f <- function(x) {
-  r <- quantile(x, probs = c(0.10, 0.25, 0.5, 0.75, 0.90))
-  names(r) <- c("ymin", "lower", "middle", "upper", "ymax")
-  r
-}
-
- res = benchmark %>% 
-  group_by(Approach,Dataset) %>% 
-  summarise_all(mean)
-res = data.frame(res)
-
-res = benchmark %>% 
-  group_by(Approach,Dataset,Seed) %>% 
-  summarise_all(mean)
+    
+write_csv(x = benchmark,file = paste0("Results/",f_name,".csv"))
+    
 
 
-res1 = benchmark %>% 
-  group_by(Approach,Dataset) %>% 
-  summarise_all(mean)
-
-ggplot(res,aes(Approach,AUC))+
-  stat_summary(fun.y  = mean,geom = "point")+
-  stat_summary(fun.data = mean_se,geom = "errorbar")
-  
-
-
-## kruskal test
-kw = spread(benchmark[,1:6],"Approach","AUC")
-kruskal.test(x = res$AUC,g = res$Approach)
-
-wilcox.test(x = kw$`mbiome + meta_data`,y = kw$`DCV-rfRFE`,paired = T,alternative = "two.sided")
-wilcox.test(x = kw$`DCV-ridgeEnsemble`,y = kw$`Coda-LASSO`,paired = T,alternative = "two.sided")
-
-
+# f <- function(x) {
+#   r <- quantile(x, probs = c(0.10, 0.25, 0.5, 0.75, 0.90))
+#   names(r) <- c("ymin", "lower", "middle", "upper", "ymax")
+#   r
+# }
+# 
+#  res = benchmark %>% 
+#   group_by(Approach,Dataset) %>% 
+#   summarise_all(mean)
+# res = data.frame(res)
+# 
+# res = benchmark %>% 
+#   group_by(Approach,Dataset,Seed) %>% 
+#   summarise_all(mean)
+# 
+# 
+# res1 = benchmark %>% 
+#   group_by(Approach,Dataset) %>% 
+#   summarise_all(mean)
+# 
+# ggplot(res,aes(Approach,AUC))+
+#   stat_summary(fun.y  = mean,geom = "point")+
+#   stat_summary(fun.data = mean_se,geom = "errorbar")
+#   
+# 
+# 
+# ## kruskal test
+# kw = spread(benchmark[,1:6],"Approach","AUC")
+# kruskal.test(x = res$AUC,g = res$Approach)
+# 
+# wilcox.test(x = kw$`mbiome + meta_data`,y = kw$`DCV-rfRFE`,paired = T,alternative = "two.sided")
+# wilcox.test(x = kw$`DCV-ridgeEnsemble`,y = kw$`Coda-LASSO`,paired = T,alternative = "two.sided")
+# 
+# 
