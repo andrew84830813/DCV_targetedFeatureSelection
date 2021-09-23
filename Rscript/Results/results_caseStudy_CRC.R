@@ -16,18 +16,13 @@ fnames = dir("Results/")
 #  nm[10] = "cmg_YuJ_2015_crc"
 # 
 #  
- 
- 
- 
- ## Final Data Sets to include
- nm = "cmg_FengQ-2015_crc"
- nm[2] = "cmg_WirbelJ-2018_crc"
- nm[3] = "cmg_ZellerG_2014_crc"
- nm[4] = "cmg_YuJ_2015_crc"
- 
- 
 
-results_all = data.frame()
+
+
+## Final Data Sets to include
+nm = "crcLODO"
+
+
 for(f_name in nm){
   bool = str_detect(fnames,paste0(f_name,"_seed"))
   f = fnames[bool]
@@ -36,49 +31,40 @@ for(f_name in nm){
     ph = read_csv(file = paste0("Results/",i))
     results = rbind(results,ph)
   }
-  results = separate(results,col = 2,into = c("Dataset","s"),sep = "_seed") %>% 
-    dplyr::select(-s)
-  ## correct fold mislabeling
-  results$corrected_fold = rep(c(rep(1,5),rep(2,5)),5)
-  results_all = rbind(results_all,results)
 }
 
 
-res = results_all %>%
-  group_by(Approach,Dataset) %>%
+res = results %>%
+  group_by(Approach,Scenario,Seed) %>%
   summarise_all(mean)
-ds = unique(res$Dataset)
-res.df = data.frame()
-for(d in ds){
-  ph = res %>% 
-    filter(Dataset==d)
-  ph$col = "black"
-  i = which.max(ph$AUC)
-  ph$col[i] = "red"
-  res.df = rbind(res.df,ph)
+
+n_fun <- function(x){
+  return(data.frame(y = mean(x), label = round(mean(x),3) ))
 }
-res = data.frame(res)
 
 #tiff(filename =paste0(f_name,".tiff"),width = 4.5,height = 5.5,units = "in",res = 300)
-ggplot(results_all,aes(Approach,AUC))+
+ggplot(res,aes(Scenario,AUC,fill = Scenario,label =AUC))+
   theme_bw()+
-  coord_flip()+
-  stat_summary(fun.y = mean, geom = "line",size = .75,col = "grey",aes(group =1))+
-  geom_point(data = res.df,aes(Approach,AUC),col = res.df$col,size = 3)+
-  stat_summary(fun.data = mean_se,geom = "errorbar",width = .5)+
-  facet_wrap(.~Dataset,nrow = 2)+
+  facet_grid(.~Approach)+
+  geom_line(aes(group = Seed),col = "gray",alpha = .5)+
+  geom_violin(alpha = .5,)+
+  ggsci::scale_color_d3()+
+  ggsci::scale_fill_d3()+
+  stat_summary(fun = "mean",
+               geom = "crossbar", 
+               width = 0.35,
+               colour = "black")+
+  geom_point(aes(col = Scenario))+
+  stat_summary(fun.y = mean, geom = "point",col = "red",size = 2)+
+  stat_summary(fun.data = n_fun, geom = "text",size = 4,position = position_nudge(x = .4))+
+  stat_summary(fun.data = mean_cl_normal,geom = "errorbar",width = .125)+
   theme(legend.position = "top",
         plot.title = element_text(size = 7,hjust = .5,face = "bold"),
-        #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
-        axis.title = element_text(size = 12),
-        #axis.title.y = element_blank(),
-        #axis.text.y = element_text(size = 7),
-        #axis.text.y = element_blank(),
-        #legend.margin=margin(-1,-1,-1,-1),
+        axis.title = element_text(size = 8),
         strip.switch.pad.wrap = margin(0,0,0,0),
         legend.margin=margin(-5,-10,-10,-10),
-        axis.text = element_text(size = 12),
-        #panel.grid = element_blank(),
+        axis.text = element_text(size = 8),
+        panel.grid = element_blank(),
         legend.key.size = unit(.15,units = "in"),
         legend.text = element_text(size = 8),
         legend.title = element_text(size = 8),

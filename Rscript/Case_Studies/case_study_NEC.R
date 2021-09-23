@@ -178,14 +178,14 @@ message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
   }))
   
   
-  # GLM - Mbiome + Meta --------------------------------------------------------------------
+  # GLM -  Meta --------------------------------------------------------------------
   message("Compute Performance - Metadata Alone GLM")
   suppressMessages(suppressWarnings({
     
     
     ## retrieve test and train data
-    train.data = cbind(train_data.meta)
-    test.data = cbind(test_data.meta)
+    train.data = cbind(train_metadata)
+    test.data = cbind(test.metadata)
     y_label = ttData$y_train
     y_test = ttData$y_test
     
@@ -204,7 +204,7 @@ message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
           bool  = flds==f
           compTime2 = system.time({
             cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data[bool,]),y_label[bool], 
-                                             standardize=F, alpha=a,family=type_family)
+                                             standardize=T, alpha=a,family=type_family)
           })
           
           ## make predictions
@@ -227,7 +227,7 @@ message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
     
     ## Train GLM
     compTime2 = system.time({
-      cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data),y_label, standardize=F, alpha = min_dev$a[1],family=type_family)
+      cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data),y_label, standardize=T, alpha = min_dev$a[1],family=type_family)
     })
     if(type_family=="binomial"){
       features = as.matrix(coef(cv.clrlasso, s = "lambda.min"))
@@ -235,6 +235,8 @@ message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
       features = features[abs(features)>0]
       length(features)
       c = as.matrix(coef(cv.clrlasso, s = "lambda.min"))[-1,]
+      train_data.metaGLM = subset(train.data,select = names(features))
+      test_data.metaGLM = subset(test.data,select = names(features))
     }else{
       features = as.matrix(stats::coef(cv.clrlasso, s = "lambda.min"))
       feat.df = data.frame()
@@ -248,6 +250,8 @@ message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
         group_by(Ratio) %>% 
         summarise(coef = sum(coef)) %>% 
         filter(coef!=0)
+      train_data.metaGLM = subset(train.data,select = feat.df$Ratio)
+      test_data.metaGLM = subset(test.data,select = feat.df$Ratio)
     }
     
     ## make predictions
@@ -485,8 +489,9 @@ message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
     
    
     ## retrieve test and train data
-    train.data = cbind(tar_dcv$weighted_features$train,train_data.meta)
-    test.data = cbind(tar_dcv$weighted_features$test,test_data.meta)
+    cc = tar_dcv$ridge_coefficients
+    train.data = cbind(sweep(tar_dcv$weighted_features$train,MARGIN = 2,STATS = as.numeric(cc),FUN = "*")  ,train_data.metaGLM)
+    test.data = cbind(sweep(tar_dcv$weighted_features$test,MARGIN = 2,STATS = as.numeric(cc),FUN = "*"),test_data.metaGLM)
     y_label = ttData$y_train
     y_test = ttData$y_test
     
@@ -505,7 +510,7 @@ message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
           bool  = flds==f
           compTime2 = system.time({
             cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data[bool,]),y_label[bool], 
-                                             standardize=F, alpha=a,family=type_family)
+                                             standardize=T, alpha=a,family=type_family)
           })
           
           ## make predictions
@@ -528,7 +533,7 @@ message("\n\n``````` Start Seed:  ",sd,"````````````\n\n","fold",f)
     
     ## Train GLM
     compTime2 = system.time({
-      cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data),y_label, standardize=F, alpha = min_dev$a[1],family=type_family)
+      cv.clrlasso <- glmnet::cv.glmnet(as.matrix(train.data),y_label, standardize=T, alpha = min_dev$a[1],family=type_family)
     })
     if(type_family=="binomial"){
       features = as.matrix(coef(cv.clrlasso, s = "lambda.min"))

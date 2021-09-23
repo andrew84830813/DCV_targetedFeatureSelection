@@ -1,51 +1,35 @@
-
+library(dplyr)
+library(ggplot2)
 
 fnames = dir("Results/")
 
 
-# nm = "cmg_RubelMA-2020_STH"
-# nm[2] = "cmg_ZhuF-2020_schizo"
-# nm[3] = "cmg_QinN-2014_cirr"
-# #nm[4] = "cmg_NielsenHB-2014_ibd"
-# nm[4] = "cmg_FengQ-2015_crc"
-# #nm[6] = "cmg_ThomasAM_2019_crc" ## sim
-#  nm[7] = "cmg_WirbelJ-2018_crc"
-# # nm[8] = "cmg_YachidaS-2019_crc" ## sim
-#  nm[9] = "cmg_ZellerG_2014_crc"
-# # #f_name = "cmg_ZVogtmannE_2016_crc" ## sim
-#  nm[10] = "cmg_YuJ_2015_crc"
-# 
-#  
- 
- 
- 
- ## Final Data Sets to include
- nm = "cmg_FengQ-2015_crc"
- nm[2] = "cmg_WirbelJ-2018_crc"
- nm[3] = "cmg_ZellerG_2014_crc"
- nm[4] = "cmg_YuJ_2015_crc"
- 
- 
+
+
+## Final Data Sets to include
+nm = "16S_meanShift"
+nm[2] = "WGS_meanShift"
+
 
 results_all = data.frame()
 for(f_name in nm){
-  bool = str_detect(fnames,paste0(f_name,"_seed"))
+  bool = str_detect(fnames,f_name)
   f = fnames[bool]
   results = data.frame()
   for(i in f){
     ph = read_csv(file = paste0("Results/",i))
+    ph$corrected_fold = rep(c(rep(1,5),rep(2,5)),5)
     results = rbind(results,ph)
   }
-  results = separate(results,col = 2,into = c("Dataset","s"),sep = "_seed") %>% 
-    dplyr::select(-s)
-  ## correct fold mislabeling
-  results$corrected_fold = rep(c(rep(1,5),rep(2,5)),5)
-  results_all = rbind(results_all,results)
+  results_all= rbind(results_all,results)
 }
+results_all = tidyr::separate(results_all,col = 2,into = c("Dataset","shift","Permute","S"),sep = "_")
+  
+
 
 
 res = results_all %>%
-  group_by(Approach,Dataset) %>%
+  group_by(Scenario,Dataset,shift_parm) %>%
   summarise_all(mean)
 ds = unique(res$Dataset)
 res.df = data.frame()
@@ -60,14 +44,18 @@ for(d in ds){
 res = data.frame(res)
 
 #tiff(filename =paste0(f_name,".tiff"),width = 4.5,height = 5.5,units = "in",res = 300)
-ggplot(results_all,aes(Approach,AUC))+
+
+results_all1 = results_all %>% 
+  filter(Scenario=="Empirical")
+results_all2 = results_all %>% 
+  filter(Scenario!="Empirical")
+ggplot(results_all1,aes(shift_parm,AUC,col = Approach,shape = Approach))+
   theme_bw()+
-  coord_flip()+
-  stat_summary(fun.y = mean, geom = "line",size = .75,col = "grey",aes(group =1))+
-  geom_point(data = res.df,aes(Approach,AUC),col = res.df$col,size = 3)+
-  stat_summary(fun.data = mean_se,geom = "errorbar",width = .5)+
-  facet_wrap(.~Dataset,nrow = 2)+
-  theme(legend.position = "top",
+  stat_summary(fun.y = mean, geom = "line",size = .75,aes(group =Approach))+
+  stat_summary(fun.y = mean, geom = "point",size = 3,aes(group =Approach))+
+  stat_summary(fun.data = mean_cl_normal,geom = "errorbar",width = .25)+
+  facet_wrap(.~Dataset,nrow = 1)+
+  theme(legend.position = "top",panel.grid = element_blank(),
         plot.title = element_text(size = 7,hjust = .5,face = "bold"),
         #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
         axis.title = element_text(size = 12),
@@ -85,13 +73,24 @@ ggplot(results_all,aes(Approach,AUC))+
         #legend.background = element_rect(colour = "black")
   )
 
-ggplot(results_all,aes(Approach,number_parts))+
+
+f <- function(x) {
+  r <- quantile(x, probs = c(0.10, 0.25, 0.5, 0.75, 0.90))
+  names(r) <- c("ymin", "lower", "middle", "upper", "ymax")
+  r
+}
+
+ggplot(results_all,aes(shift_parm,AUC,col = Scenario,shape =Scenario))+
   theme_bw()+
-  coord_flip()+
-  stat_summary(fun.y = mean, geom = "col",size = 1,col = "black")+
-  stat_summary(fun.data = mean_se,geom = "errorbar",width = .5)+
-  facet_wrap(.~Dataset,nrow = 2)+
-  theme(legend.position = "top",
+  geom_point()+
+  ggsci::scale_color_d3()+
+  #scale_x_continuous(breaks = unique(results_all$shift_parm))+
+  stat_summary(fun.y = mean, geom = "line",size = .75)+
+  stat_summary(fun.y = mean, geom = "point",size = 3)+
+  stat_summary(fun.data = ggplot2::mean_cl_normal,geom = "errorbar",width = .25)+
+  facet_grid(Dataset~Approach)+
+  theme(legend.position = "top",panel.grid = element_blank(),
+        strip.background = element_blank(),strip.text = element_text(face = "bold",size = 8),
         plot.title = element_text(size = 7,hjust = .5,face = "bold"),
         #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
         axis.title = element_text(size = 12),
@@ -108,6 +107,8 @@ ggplot(results_all,aes(Approach,number_parts))+
         legend.title = element_text(size = 8),
         #legend.background = element_rect(colour = "black")
   )
+
+
 
 
 
@@ -120,8 +121,8 @@ cx = list( c("DCV-rfRFE","CLR-LASSO"), c("DCV-rfRFE","Coda-LASSO"),
            c("DCV-ridgeRegression","CLR-LASSO"),c("DCV-ridgeRegression","Coda-LASSO")  )
 
 
-dd = results_all %>%
-  dplyr::group_by(Dataset) %>%
+dd = results_all1 %>%
+  dplyr::group_by(Scenario,Dataset,shift_parm) %>%
   rstatix::wilcox_test(data =., AUC ~ Approach,paired = T,comparisons =  cx) %>%
   rstatix::adjust_pvalue(method = "BH") %>%
   rstatix::add_significance("p.adj") %>%
