@@ -17,6 +17,8 @@
 #' @param dcv a dcv matrix can optionally be provided
 #' @param lrs.train An optional supplied logratio matrix for training data; must be supplied if dcv scores are pre computed
 #' @param lrs.test An optional supplied logratio matrix for test data; must be supplied if dcv scores are pre computed
+#' @param useRidgeWeights should ensemble model first be weighted by ridge regression coefficients?
+#' @param scaledata should train data be scaled (test data scaled based on train)
 #'
 #' @return
 #' 
@@ -31,7 +33,7 @@ targeted_dcvSelection = function(trainx,
                                  ensemble  = c("ranger","pls","svmRadial","glmnet","rangerE"), tarFeatures = 5,
                                  imp_factor = 1e-7,
                                  select_randomFeatures = F,
-                                 ts.id,seed = 08272008,max_sparsity = .9){
+                                 ts.id,seed = 08272008,max_sparsity = .9,useRidgeWeights=T,scaledata = T){
   
   result = data.frame()
   geo.mean = function(x){
@@ -113,9 +115,11 @@ targeted_dcvSelection = function(trainx,
     
     
     ## scale data
-    pp = caret::preProcess(glm.train,method = "scale")
-    glm.train <- predict(pp, glm.train)
-    glm.test     <- predict(pp, glm.test)
+    if(scaledata ){
+      pp = caret::preProcess(glm.train,method = "scale")
+      glm.train <- predict(pp, glm.train)
+      glm.test     <- predict(pp, glm.test)
+    }
     
     
     ## Train Ridge Model
@@ -182,14 +186,20 @@ targeted_dcvSelection = function(trainx,
       train_data2 = subset(glm.train,select = unique(names(features)))
       test_data2 = subset(glm.test,select = unique(names(features)))
       
-      train_data2 = sweep(train_data2,MARGIN = 2,STATS = c,FUN = "*")
-      test_data2 = sweep(test_data2,MARGIN = 2,STATS = c,FUN = "*")  
+      
+      if(useRidgeWeights){
+        train_data2 = sweep(train_data2,MARGIN = 2,STATS = c,FUN = "*")
+        test_data2 = sweep(test_data2,MARGIN = 2,STATS = c,FUN = "*")   
+      }
+       
     }else{
       train_data2 = subset(glm.train,select = feat.df$Ratio)
       test_data2 = subset(glm.test,select = feat.df$Ratio)
       
-      train_data2 = sweep(train_data2,MARGIN = 2,STATS = feat.df$coef,FUN = "*")
-      test_data2 = sweep(test_data2,MARGIN = 2,STATS = feat.df$coef,FUN = "*")  
+      if(useRidgeWeights){
+        train_data2 = sweep(train_data2,MARGIN = 2,STATS = feat.df$coef,FUN = "*")
+        test_data2 = sweep(test_data2,MARGIN = 2,STATS = feat.df$coef,FUN = "*")  
+      }
       
     }
     

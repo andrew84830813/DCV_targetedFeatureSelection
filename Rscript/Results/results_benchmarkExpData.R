@@ -59,26 +59,31 @@ for(d in ds){
 }
 res = data.frame(res)
 
+
+results_all$seed_fold = paste0(results_all$Seed,"_",results_all$corrected_fold) 
+
 #tiff(filename =paste0(f_name,".tiff"),width = 4.5,height = 5.5,units = "in",res = 300)
 ggplot(results_all,aes(Approach,AUC))+
   theme_bw()+
   coord_flip()+
-  stat_summary(fun.y = mean, geom = "line",size = .75,col = "grey",aes(group =1))+
-  geom_point(data = res.df,aes(Approach,AUC),col = res.df$col,size = 3)+
-  stat_summary(fun.data = mean_se,geom = "errorbar",width = .5)+
-  facet_wrap(.~Dataset,nrow = 2)+
+  stat_summary(fun.y = mean, geom = "line",size = 1,col = "black",aes(group =1))+
+  stat_summary(fun.data = mean_se,geom = "errorbar",width = .05)+
+  #geom_line(aes(group =seed_fold),col = "gray")+
+  #geom_point(col  ="gray",size = 1)+
+  geom_point(data = res.df,aes(Approach,AUC),col = "black",fill = res.df$col,size = 3,pch = 21)+
+  facet_wrap(.~Dataset,nrow = 1,scales = "free_x")+
   theme(legend.position = "top",
         plot.title = element_text(size = 7,hjust = .5,face = "bold"),
         #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
-        axis.title = element_text(size = 12),
-        #axis.title.y = element_blank(),
+        axis.title = element_text(size = 8),
+        axis.title.y = element_blank(),
         #axis.text.y = element_text(size = 7),
         #axis.text.y = element_blank(),
         #legend.margin=margin(-1,-1,-1,-1),
         strip.switch.pad.wrap = margin(0,0,0,0),
         legend.margin=margin(-5,-10,-10,-10),
-        axis.text = element_text(size = 12),
-        #panel.grid = element_blank(),
+        axis.text = element_text(size = 8),
+        panel.grid = element_blank(),
         legend.key.size = unit(.15,units = "in"),
         legend.text = element_text(size = 8),
         legend.title = element_text(size = 8),
@@ -88,9 +93,9 @@ ggplot(results_all,aes(Approach,AUC))+
 ggplot(results_all,aes(Approach,number_parts))+
   theme_bw()+
   coord_flip()+
-  stat_summary(fun.y = mean, geom = "col",size = 1,col = "black")+
-  stat_summary(fun.data = mean_se,geom = "errorbar",width = .5)+
-  facet_wrap(.~Dataset,nrow = 2)+
+  stat_summary(fun.y = mean, geom = "col",size = 1,col = "black",width = .7)+
+  stat_summary(fun.data = mean_se,geom = "errorbar",width = .15)+
+  facet_wrap(.~Dataset,nrow = 1,scales = "free_x")+
   theme(legend.position = "top",
         plot.title = element_text(size = 7,hjust = .5,face = "bold"),
         #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
@@ -102,7 +107,7 @@ ggplot(results_all,aes(Approach,number_parts))+
         strip.switch.pad.wrap = margin(0,0,0,0),
         legend.margin=margin(-5,-10,-10,-10),
         axis.text = element_text(size = 12),
-        #panel.grid = element_blank(),
+        panel.grid = element_blank(),
         legend.key.size = unit(.15,units = "in"),
         legend.text = element_text(size = 8),
         legend.title = element_text(size = 8),

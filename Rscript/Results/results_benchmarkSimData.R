@@ -82,7 +82,7 @@ f <- function(x) {
 
 ggplot(results_all,aes(shift_parm,AUC,col = Scenario,shape =Scenario))+
   theme_bw()+
-  geom_point()+
+  #geom_point()+
   ggsci::scale_color_d3()+
   #scale_x_continuous(breaks = unique(results_all$shift_parm))+
   stat_summary(fun.y = mean, geom = "line",size = .75)+
