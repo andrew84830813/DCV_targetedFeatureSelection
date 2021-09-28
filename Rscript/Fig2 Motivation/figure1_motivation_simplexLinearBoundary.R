@@ -33,7 +33,7 @@ doParallel::registerDoParallel(clus)
 
 ## Shift Data Within Simplex
 ## D1
-comp =  compositions::rDirichlet.acomp(2,alpha = 200*c(3,2,1));plot(comp);comp = data.frame(comp)
+comp =  compositions::rDirichlet.acomp(2,alpha = 200*c(4,2,1));plot(comp);comp = data.frame(comp)
 s1 = data.frame(Dataset = "D1",Status = "C1",comp)
 # comp =  compositions::rDirichlet.acomp(100,alpha = 20*c(3,1,1));plot(comp);comp = data.frame(comp)
 # s2 = data.frame(Dataset = "D1",Status = "C2",comp)
@@ -140,6 +140,27 @@ ggtern(tbl,aes(x = V1,y = V2,z = V3,col = Status, shape = Dataset))+
   
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Train Model Relative Abundance
 ## Select Dataset 1
 df = tbl %>% 
@@ -155,7 +176,7 @@ df2$Status = factor(df2$Status)
 
 ## Train RF 
 m1 = trainML_Models(trainLRs = df[,-1],testLRs = df2[,-1],
-                    ytrain = df[,1],y_test = df2[,1],models = "pls",
+                    ytrain = df[,1],y_test = df2[,1],models = "glmnet",
                     mtry_ = round(sqrt(ncol(df[,-1]))),ntrees = 500,
                     numFolds = 10,cvMethod = "repeatedcv",numRepeats = 10
 )
@@ -185,28 +206,28 @@ roc.df$trial = factor(roc.df$trial,levels = c("Train","Test"),
                                     paste0("Test: ",ccs$Comp[ccs$trial!="Train"])) 
 )
 
-## PLot ROC
-tiff(filename = "Figures/figure1bc_relativeAbundanceROC.tiff",width = 2.5,height = 2,units = "in",res = 300)
-ggplot(roc.df,aes(spec,sens,col = trial,group = trial,lty = trial))+
-  geom_line(size = .75)+
-  theme_classic()+
-  xlab("1-Specificity")+
-  ylab("Sensitivity")+
-  ggtitle("PLS with Rel. Abundance")+
-  geom_abline(slope = 1,col = "grey")+
-  theme(legend.position = "top",
-        legend.title = element_blank(),plot.title = element_text(hjust = .5,size = 8,face = "bold"),
-        panel.grid = element_blank(),
-        axis.line = element_line(size = .5),
-        legend.text = element_text(size = 6),
-        legend.key.height = unit(0.1, "cm"),
-        legend.margin=margin(-5,0,-15,-10),
-        text = element_text(size = 8),
-        axis.title = element_text(face = "bold",size = 8),
-        axis.text = element_text(size = 8),
-  )+
-  guides(color=guide_legend(nrow=2,byrow=TRUE))
-dev.off()
+# ## PLot ROC
+# tiff(filename = "Figures/figure1bc_relativeAbundanceROC.tiff",width = 2.5,height = 2,units = "in",res = 300)
+# ggplot(roc.df,aes(spec,sens,col = trial,group = trial,lty = trial))+
+#   geom_line(size = .75)+
+#   theme_classic()+
+#   xlab("1-Specificity")+
+#   ylab("Sensitivity")+
+#   ggtitle("PLS with Rel. Abundance")+
+#   geom_abline(slope = 1,col = "grey")+
+#   theme(legend.position = "top",
+#         legend.title = element_blank(),plot.title = element_text(hjust = .5,size = 8,face = "bold"),
+#         panel.grid = element_blank(),
+#         axis.line = element_line(size = .5),
+#         legend.text = element_text(size = 6),
+#         legend.key.height = unit(0.1, "cm"),
+#         legend.margin=margin(-5,0,-15,-10),
+#         text = element_text(size = 8),
+#         axis.title = element_text(face = "bold",size = 8),
+#         axis.text = element_text(size = 8),
+#   )+
+#   guides(color=guide_legend(nrow=2,byrow=TRUE))
+# dev.off()
 
 feat = colnames(df[,-1])
 test_ran = data.frame(rDirichlet.acomp(1e4,alpha = 1*rep(1,ncol(df[,-1]))))
@@ -231,9 +252,9 @@ base = base %>%
   rename(Class1_Probability = C1)
 decison_bound = decison_bound %>% 
   rename(Class1_Probability = C1)
-
 col_ = if_else(base$Status=="C1","Purple","yellow")
-tiff(filename = "Figures/figure1b_relabundTern.tiff",width = 3,height = 3,units = "in",res = 300)
+
+pdf(file = "Figures/fig2_simplexLinear_RA_ranger.pdf",width = 3 ,height = 3)
 ggtern(test_ran,aes(V1,V2,V3,col = Class1_Probability,value = Class1_Probability*1000))+
   geom_point(alpha = .5,pch = 15,size = 3)+
   geom_line(data = decison_bound,aes(x = V1,y = V2,z = V3),size = 1,col  ="black")+
@@ -242,11 +263,9 @@ ggtern(test_ran,aes(V1,V2,V3,col = Class1_Probability,value = Class1_Probability
   theme_notitles()+
   scale_color_distiller(palette = "RdBu")+
   scale_fill_distiller(palette = "RdBu")+
-  geom_point(data = base,aes(V1,V2,V3,shape = Dataset),size  = 1.25,alpha = 1,col = col_)+
-  scale_shape_manual(values = c(4,16))+
-  # annotate(geom = "text",x = .4,y = .32,z =.18 ,label = "Decision \nBound",angle = 78,size = 2)+
-  # annotate(geom = "text",x = .75,y = .15,z =.2 ,label = "Test \nDataset",size = 2,angle = 20)+
-  # annotate(geom = "text",x = .08,y = .7,z =.22 ,label = "Train \nDataset",size = 2,angle = 20)+
+  #geom_point(data = base,aes(V1,V2,V3,shape = Dataset),size  = .75,alpha = .8,col = col_)+
+  scale_shape_manual(values = c(4,1))+
+  annotate(geom = "text",x = .4,y = .32,z =.18 ,label = "Decision Boundary",angle = 78,size = 2)+
   theme(legend.position = "none",
         #legend.title = element_blank(),
         panel.grid = element_blank(),
@@ -259,6 +278,8 @@ ggtern(test_ran,aes(V1,V2,V3,col = Class1_Probability,value = Class1_Probability
         axis.title = element_text(face = "bold",size = 8),
         axis.text = element_text(size = 8),
   )  
+
+  
 dev.off()
 
 
@@ -267,7 +288,7 @@ dev.off()
 plr = calcLogRatio(df)
 plr2 = calcLogRatio(df2)
 m1.plr = trainML_Models(trainLRs = plr[,-1],testLRs = plr2[,-1],
-                        ytrain = plr[,1],y_test = plr2[,1],models = "pls",
+                        ytrain = plr[,1],y_test = plr2[,1],models = "glmnet",
                         mtry_ = round(sqrt(ncol(df[,-1]))),ntrees = 500,
                         numFolds = 10,cvMethod = "repeatedcv",numRepeats = 5)
 
@@ -348,7 +369,7 @@ ggtern(test_ran,aes(V1,V2,V3,col = C1,value = C1*1000))+
   theme_notitles()+
   scale_color_distiller(palette = "RdBu")+
   scale_fill_distiller(palette = "RdBu")+
-  geom_point(data = base,aes(V1,V2,V3,shape = Dataset),size  = 1.25,alpha = 1,col = col_)+
+  #geom_point(data = base,aes(V1,V2,V3,shape = Dataset),size  = 1.25,alpha = 1,col = col_)+
   scale_shape_manual(values = c(4,16))+
   # annotate(geom = "text",x = .4,y = .32,z =.18 ,label = "Decision \nBound",angle = 78,size = 2)+
   # annotate(geom = "text",x = .75,y = .15,z =.2 ,label = "Test \nDataset",size = 2,angle = 20)+

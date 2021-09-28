@@ -80,13 +80,19 @@ f <- function(x) {
   r
 }
 
-ggplot(results_all,aes(shift_parm,AUC,col = Scenario,shape =Scenario))+
+sets = data.frame(shift_parm = 1:6,shift_per = (seq(1,1.3,length.out = 6)-1)*100)
+results_all = left_join(results_all,sets)
+
+
+pdf(file = "Figures/benchamrk_SimData.pdf",width = 7 ,height = 4)
+ggplot(results_all,aes(shift_per,AUC,col = Scenario,shape =Scenario))+
   theme_bw()+
   #geom_point()+
   ggsci::scale_color_d3()+
+  xlab("% Mean Shift")+
   #scale_x_continuous(breaks = unique(results_all$shift_parm))+
   stat_summary(fun.y = mean, geom = "line",size = .75)+
-  stat_summary(fun.y = mean, geom = "point",size = 3)+
+  stat_summary(fun.y = mean, geom = "point",size = 2)+
   stat_summary(fun.data = ggplot2::mean_cl_normal,geom = "errorbar",width = .25)+
   facet_grid(Dataset~Approach)+
   theme(legend.position = "top",panel.grid = element_blank(),
@@ -107,7 +113,7 @@ ggplot(results_all,aes(shift_parm,AUC,col = Scenario,shape =Scenario))+
         legend.title = element_text(size = 8),
         #legend.background = element_rect(colour = "black")
   )
-
+dev.off()
 
 
 

@@ -1,0 +1,17 @@
+ID,Label,Part,Coef,col,abs_coef
+Enterococcus,Enterococcus,Enterococcus,-0.11989540539710276,nonNEC,0.11989540539710276
+Cutibacterium,Cutibacterium,Cutibacterium,0.09085660920914285,NEC,0.09085660920914285
+Klebsiella,Klebsiella,Klebsiella,0.10156638317163387,NEC,0.10156638317163387
+Clostridium,Clostridium,Clostridium,-0.07439567747026078,nonNEC,0.07439567747026078
+Staphylococcus,Staphylococcus,Staphylococcus,0.12022102775492127,NEC,0.12022102775492127
+Clostridioides,Clostridioides,Clostridioides,-0.04717634482724686,nonNEC,0.04717634482724686
+Gemella,Gemella,Gemella,0.007044974972073417,NEC,0.007044974972073417
+Pseudomonas,Pseudomonas,Pseudomonas,-0.10013044051441233,nonNEC,0.10013044051441233
+Serratia,Serratia,Serratia,0.022889024179351944,NEC,0.022889024179351944
+Veillonella,Veillonella,Veillonella,0.009918696064601417,NEC,0.009918696064601417
+Bradyrhizobium,Bradyrhizobium,Bradyrhizobium,-0.0191203610777989,nonNEC,0.0191203610777989
+Dermabacter,Dermabacter,Dermabacter,0.004653413960602205,NEC,0.004653413960602205
+Escherichia,Escherichia,Escherichia,-0.038640296497337565,nonNEC,0.038640296497337565
+Actinomyces,Actinomyces,Actinomyces,-0.023774149211465152,nonNEC,0.023774149211465152
+Bacteroides,Bacteroides,Bacteroides,0.07286803786105417,NEC,0.07286803786105417
+Anaerococcus,Anaerococcus,Anaerococcus,-0.0068854921777567815,nonNEC,0.0068854921777567815

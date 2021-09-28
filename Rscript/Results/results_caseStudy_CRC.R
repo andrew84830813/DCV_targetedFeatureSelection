@@ -1,27 +1,25 @@
-
-
-fnames = dir("Results/")
-
-
-# nm = "cmg_RubelMA-2020_STH"
-# nm[2] = "cmg_ZhuF-2020_schizo"
-# nm[3] = "cmg_QinN-2014_cirr"
-# #nm[4] = "cmg_NielsenHB-2014_ibd"
-# nm[4] = "cmg_FengQ-2015_crc"
-# #nm[6] = "cmg_ThomasAM_2019_crc" ## sim
-#  nm[7] = "cmg_WirbelJ-2018_crc"
-# # nm[8] = "cmg_YachidaS-2019_crc" ## sim
-#  nm[9] = "cmg_ZellerG_2014_crc"
-# # #f_name = "cmg_ZVogtmannE_2016_crc" ## sim
-#  nm[10] = "cmg_YuJ_2015_crc"
-# 
-#  
-
-
+## Top 50
+fnames = dir("Results/CRC_top50/")
 
 ## Final Data Sets to include
 nm = "crcLODO"
 
+for(f_name in nm){
+  bool = str_detect(fnames,paste0(f_name,"_seed"))
+  f = fnames[bool]
+  results = data.frame()
+  for(i in f){
+    ph = read_csv(file = paste0("Results/CRC_top50/",i))
+    results = rbind(results,ph)
+  }
+}
+
+
+## Optimal
+fnames = dir("Results/")
+
+## Final Data Sets to include
+nm = "crcLODO"
 
 for(f_name in nm){
   bool = str_detect(fnames,paste0(f_name,"_seed"))
@@ -38,29 +36,39 @@ res = results %>%
   group_by(Approach,Scenario,Seed) %>%
   summarise_all(mean)
 
+results = results %>% 
+  filter(Approach=="DCV-ridgeRegression")
+results$correctedFold = rep(c(1,2,1,2),252)
+
 n_fun <- function(x){
   return(data.frame(y = mean(x), label = round(mean(x),3) ))
 }
 
-#tiff(filename =paste0(f_name,".tiff"),width = 4.5,height = 5.5,units = "in",res = 300)
-ggplot(res,aes(Scenario,AUC,fill = Scenario,label =AUC))+
+pdf(file = "Figures/caseStudy_CRC_glmAUC.pdf",width = 2.5 ,height = 3)
+ggplot(results,aes(Scenario,AUC,fill = Scenario,label =AUC))+
   theme_bw()+
-  facet_grid(.~Approach)+
+  #facet_grid(.~Approach)+
   geom_line(aes(group = Seed),col = "gray",alpha = .5)+
-  geom_violin(alpha = .5,)+
-  ggsci::scale_color_d3()+
-  ggsci::scale_fill_d3()+
+  geom_boxplot(alpha = .5,width = .4,outlier.color = NA)+
+  scale_color_manual(values = ggsci::pal_lancet()(6)[5:6])+
+  scale_fill_manual(values = ggsci::pal_lancet()(6)[5:6])+
   stat_summary(fun = "mean",
                geom = "crossbar", 
                width = 0.35,
                colour = "black")+
-  geom_point(aes(col = Scenario))+
+  geom_point(aes(col = Scenario),alpha = .5,shape = 1)+
+  geom_signif(comparisons = list(c("Permuted", "Empirical")),tip_length = 0, 
+               map_signif_level=F,test = "wilcox.test",
+               #test.args = list(paired = T) 
+              )+
   stat_summary(fun.y = mean, geom = "point",col = "red",size = 2)+
   stat_summary(fun.data = n_fun, geom = "text",size = 4,position = position_nudge(x = .4))+
   stat_summary(fun.data = mean_cl_normal,geom = "errorbar",width = .125)+
-  theme(legend.position = "top",
+  xlab("Training Label Distribution")+
+  theme(legend.position = "none",
+        strip.background = element_blank(),
         plot.title = element_text(size = 7,hjust = .5,face = "bold"),
-        axis.title = element_text(size = 8),
+        axis.title = element_text(size = 8,face = "bold"),
         strip.switch.pad.wrap = margin(0,0,0,0),
         legend.margin=margin(-5,-10,-10,-10),
         axis.text = element_text(size = 8),
@@ -70,6 +78,8 @@ ggplot(res,aes(Scenario,AUC,fill = Scenario,label =AUC))+
         legend.title = element_text(size = 8),
         #legend.background = element_rect(colour = "black")
   )
+
+dev.off()
 
 ggplot(results_all,aes(Approach,number_parts))+
   theme_bw()+

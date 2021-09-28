@@ -205,18 +205,21 @@ library(ggsignif)
 cof = coef(tar_dcv$glm_model$mdl)
 cc = tar_dcv$ridge_coefficients
 p = stats::predict(tar_dcv$glm_model$mdl, newx = as.matrix(tar_dcv$glm_model$data$train), s = "lambda.min",type = "lin")
-p.df = data.frame(NEC = y_labels,GLM_Score = as.numeric(p),Survival = factor(md1$Survived,levels = c("Yes","No")))
+p.df = data.frame(NEC = y_labels,GLM_Score = as.numeric(p)-cof[1],
+                  Survival = factor(md1$Survived,levels = c("Yes","No")),
+                  Sepsis = md1$Sepsis.diagnosed,onsetDays = md1$Days.of.period.NEC.diagnosed)
 
 
 ## Visualize Overall Scores Between Groups
-ggplot(p.df,aes(NEC,GLM_Score-cof[1],fill = NEC))+
+pdf(file = "Figures/caseStudy_NEC_glmScores.pdf",width = 2 ,height = 2.5)
+ggplot(p.df,aes(NEC,GLM_Score,fill = NEC))+
   geom_boxplot(alpha = .7)+
   #geom_jitter(aes(col  = NEC),width = .1,alpha = .9)+
   ggsci::scale_fill_lancet()+
   ggsci::scale_color_lancet()+
-  ylab("Score")+
-  geom_signif(comparisons = list(c("No", "Yes")), 
-              map_signif_level=F,test = "wilcox.test",)+
+  ylab("Logistics Regression Score")+
+  # geom_signif(comparisons = list(c("No", "Yes")), 
+  #             map_signif_level=F,test = "wilcox.test",)+
   theme_bw()+
   theme(legend.position = "none",panel.grid = element_blank(),
         plot.title = element_text(size = 8,hjust = .5,face = "bold"),
@@ -237,17 +240,19 @@ ggplot(p.df,aes(NEC,GLM_Score-cof[1],fill = NEC))+
         #legend.background = element_rect(colour = "black")+
         
   )
-
+dev.off()
 
 ## Relate Scores to Clinical Outcomes
 p.df1 = p.df %>% 
   filter(NEC=="Yes")
-ggplot(p.df1,aes(Survival,GLM_Score-cof[1],fill = Survival))+
+
+pdf(file = "Figures/caseStudy_NEC_clinOutcome_Surv.pdf",width = 2.2 ,height = 2.25)
+ggplot(p.df1,aes(Survival,GLM_Score))+
   geom_boxplot(alpha = .7)+
   #geom_jitter(aes(col  = NEC),width = .1,alpha = .9)+
   ggsci::scale_fill_lancet()+
   ggsci::scale_color_lancet()+
-  ylab("Score")+
+  ylab("Logistics Regression Score")+
   geom_signif(comparisons = list(c("No", "Yes")),tip_length = 0, 
               map_signif_level=F,test = "wilcox.test",)+
   theme_bw()+
@@ -270,6 +275,185 @@ ggplot(p.df1,aes(Survival,GLM_Score-cof[1],fill = Survival))+
         #legend.background = element_rect(colour = "black")+
         
   )
+dev.off()
+
+## Relate Scores to time
+p.df2 = data.frame(p.df1,bin = cut(p.df1$onsetDays,breaks = seq(-7,-25,by = -1) ))
+table(p.df2$bin)
+levels(p.df2$bin) = rev(levels(p.df2$bin))
+p.df2$bin = factor(p.df2$bin,labels = 7:24)
+p.df2 = p.df2 %>% 
+  filter(!is.na(bin))
+p.df1.null = p.df %>% 
+  filter(NEC!="Yes")
+
+pdf(file = "Figures/caseStudy_NEC_clinOutcome_onset.pdf",width = 3.25 ,height = 2.5)
+ggplot(p.df2,aes(bin,GLM_Score))+
+  #geom_point(alpha = .7)+
+  stat_summary(fun.y = mean, geom = "line",col = "black",aes(group =1))+
+  stat_summary(fun.y = mean, geom = "point",size = 2,col = "black")+
+  stat_summary(fun.data = mean_se,geom = "errorbar",width = .35)+
+  geom_hline(yintercept = mean(p.df1.null$GLM_Score),lty = "dashed",col = "red")+
+  #geom_jitter(aes(col  = NEC),width = .1,alpha = .9)+
+  ggsci::scale_fill_lancet()+
+  ggsci::scale_color_lancet()+
+  xlab("NEC Onset (Days)")+
+  ylab("Logistics Regression Score")+
+  geom_signif(comparisons = list(c("No", "Yes")),tip_length = 0, 
+              map_signif_level=F,test = "wilcox.test",)+
+  theme_bw()+
+  theme(legend.position = "none",panel.grid = element_blank(),
+        plot.title = element_text(size = 8,hjust = .5,face = "bold"),
+        #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
+        axis.title = element_text(size = 8,face = "bold"),
+        #axis.title.y = element_blank(),
+        #axis.title.x = element_text(size = 8,face = "bold"),
+        #axis.text.y = element_text(size = 7),
+        #axis.text.y = element_blank(),
+        #legend.margin=margin(-1,-1,-1,-1),
+        strip.switch.pad.wrap = margin(0,0,0,0),
+        legend.margin=margin(-5,-10,-10,-10),
+        axis.text = element_text(size = 8),
+        #panel.grid = element_blank(),
+        legend.key.size = unit(.15,units = "in"),
+        legend.text = element_text(size = 8),
+        legend.title = element_blank(),
+        #legend.background = element_rect(colour = "black")+
+        
+  )
+
+dev.off()
+
+
+## Process Weights and construct log ratio network
+library(igraph)
+imp.df = data.frame(Ratio = names(cc),Imp = abs(as.numeric(cc)),raw = as.numeric(cc))
+keyRats = tidyr::separate(imp.df,1,into = c("Num","Denom"),sep = "___",remove = F)
+## Define weight such that:  weight * log(a/b) = weight * log(a) - weight * log(b) 
+weights.df = data.frame(Part = keyRats$Num,Coef = keyRats$raw)
+weights.df = rbind(weights.df,data.frame(Part = keyRats$Denom,Coef = -1*keyRats$raw))
+weights.df = weights.df %>% 
+  group_by(Part) %>% 
+  summarise_all(.funs = sum)
+weights.df$col = if_else(weights.df$Coef>0,"NEC","nonNEC")
+weights.df$col = factor(weights.df$col,levels = c("nonNEC","NEC"))
+
+library(igraph)
+el_= data.frame(keyRats$Num,keyRats$Denom,keyRats$Ratio)
+g = igraph::graph_from_edgelist(as.matrix(el_[,1:2]),directed = T)
+g = igraph::simplify(g, remove.loops = TRUE,
+                     edge.attr.comb = igraph_opt("edge.attr.comb"))
+el_act = data.frame(get.edgelist(g))
+el_act$Ratio = paste0(el_act$X1,"___",el_act$X2)
+el_act = left_join(el_act,imp.df)
+
+
+vertices = data.frame(Part = V(g)$name,Label =  V(g)$name)
+vertices = left_join(vertices,weights.df)
+v_color = if_else(vertices$Coef>0,ggsci::pal_lancet(alpha = .9)(2)[1],ggsci::pal_lancet(alpha = .9)(2)[2])
+vertices$abs_coef = abs(vertices$Coef)
+
+el_act = data.frame(get.edgelist(g))
+el_act$Ratio = paste0(el_act$X1,"___",el_act$X2)
+el_act = left_join(el_act,imp.df)
+col = if_else(el_act$raw>0,ggsci::pal_lancet(alpha = .2)(2)[1],ggsci::pal_lancet(alpha = .2)(2)[2])
+el_act$col = col
+
+
+E(g)$weight = el_act$Imp
+toGephi(Graph = g,Name = "NEC_net",attribute_metadata = vertices,edge_metadata = el_act)
+
+
+## Visualize Net Contribution of Parts to Score
+pdf(file = "Figures/caseStudy_NEC_feat_contrib.pdf",width = 5 ,height = 4.5)
+ggplot(weights.df,aes(reorder(Part,Coef),Coef,fill = col))+
+  geom_col(width = .7)+
+  ggsci::scale_fill_aaas()+
+  facet_wrap(.~col,scales = "free")+
+  coord_flip()+
+  #scale_fill_manual(values = ggsci::pal_aaas()(2)[2:1])+
+  theme_bw()+
+  theme()+
+  theme(legend.position = "none",panel.grid = element_blank(),
+        plot.title = element_text(size = 8,hjust = .5,face = "bold"),
+        strip.background = element_blank(),
+        #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
+        #axis.title = element_text(size = 12),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(size = 8,face = "bold"),
+        #axis.text.y = element_text(size = 7),
+        #axis.text.y = element_blank(),
+        #legend.margin=margin(-1,-1,-1,-1),
+        strip.switch.pad.wrap = margin(0,0,0,0),
+        legend.margin=margin(-5,-10,-10,-10),
+        axis.text = element_text(size = 8),
+        #panel.grid = element_blank(),
+        legend.key.size = unit(.15,units = "in"),
+        legend.text = element_text(size = 8),
+        legend.title = element_blank(),
+        #legend.background = element_rect(colour = "black")+
+        
+  )
+dev.off()
+
+
+
+
+
+## Visulaize Log Ratio Network of GLM Coeff 
+## Can think of as a microbial network
+pdf(file = "Figures/caseStudy_CRC_lrnet.pdf",width = 5 ,height = 5)
+par(mar=c(0,0,0,0)+.1)
+plot(g,
+     vertex.color = v_color,#rep(ggsci::pal_lancet(alpha = .75)(9)[8],vcount(g)),
+     layout = igraph::layout.kamada.kawai,
+     vertex.frame.color = "white",vertex.frame.width = .5,
+     vertex.label.cex = .7,
+     vertex.label.color = "black",
+     edge.color  =col,
+     edge.width = 125*el_act$Imp ,
+     vertex.size = abs(vertices$Coef) * 15+2,
+     edge.curved = .2,
+     edge.arrow.size = .51)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Process Weights and construct log ratio network

@@ -1,0 +1,6 @@
+Scenario,Dataset,Seed,Fold,Approach,AUC,number_parts,number_ratios,comp_time,base_dims
+Empirical,cmg_WirbelJ-2018_crc_seed2_seed2,2,2,CLR-LASSO,0.6723525230987918,11,11,0.08000000000174623,120
+Empirical,cmg_WirbelJ-2018_crc_seed2_seed2,2,2,Coda-LASSO,0.7178393745557925,25,1,3.149999999999636,120
+Empirical,cmg_WirbelJ-2018_crc_seed2_seed2,2,2,SELBAL,0.658137882018479,20,1,26.43999999999869,120
+Empirical,cmg_WirbelJ-2018_crc_seed2_seed2,2,2,DCV-ridgeRegression,0.7157071783937455,23,119,70.17000000000007,120
+Empirical,cmg_WirbelJ-2018_crc_seed2_seed2,2,2,DCV-ridgeEnsemble,0.7341862117981521,23,119,70.17000000000007,120

@@ -14,6 +14,9 @@ library(stringr)
 library(ggplot2)
 library(ggtern)
 
+## USe to get ggtern to work
+#remotes::install_version(package = "ggplot2",version = "3.2.1")
+
 
 # Load Helper Functions  ---------------------------------------------------------------
 fnames = dir("Helper_Functions/")
@@ -123,29 +126,29 @@ roc.df$trial = factor(roc.df$trial,levels = c("Train","Test"),
                                 paste0("Test: ",ccs$Comp[ccs$trial!="Train"])) 
 )
 
-## PLot ROC
-tiff(filename = "Figures/figure1a_relativeAbundance.tiff",width = 2.5,height = 2,units = "in",res = 300)
-ggplot(roc.df,aes(spec,sens,col = trial,group = trial,lty = trial))+
-  geom_line(size = .75)+
-  theme_classic()+
-  xlab("1-Specificity")+
-  ylab("Sensitivity")+
-  ggtitle("RF with Rel. Abundance")+
-  geom_abline(slope = 1,col = "grey")+
-  theme(legend.position = "top",
-        legend.title = element_blank(),plot.title = element_text(hjust = .5,size = 8,face = "bold"),
-        panel.grid = element_blank(),
-        axis.line = element_line(size = .5),
-        legend.text = element_text(size = 6),
-        legend.key.height = unit(0.1, "cm"),
-        legend.margin=margin(-5,0,-15,-10),
-        text = element_text(size = 8),
-        axis.title = element_text(face = "bold",size = 8),
-        axis.text = element_text(size = 8),
-  )+
-  guides(color=guide_legend(nrow=2,byrow=TRUE))
-
-dev.off()
+# ## PLot ROC
+# tiff(filename = "Figures/figure1a_relativeAbundance.tiff",width = 2.5,height = 2,units = "in",res = 300)
+# ggplot(roc.df,aes(spec,sens,col = trial,group = trial,lty = trial))+
+#   geom_line(size = .75)+
+#   theme_classic()+
+#   xlab("1-Specificity")+
+#   ylab("Sensitivity")+
+#   ggtitle("RF with Rel. Abundance")+
+#   geom_abline(slope = 1,col = "grey")+
+#   theme(legend.position = "top",
+#         legend.title = element_blank(),plot.title = element_text(hjust = .5,size = 8,face = "bold"),
+#         panel.grid = element_blank(),
+#         axis.line = element_line(size = .5),
+#         legend.text = element_text(size = 6),
+#         legend.key.height = unit(0.1, "cm"),
+#         legend.margin=margin(-5,0,-15,-10),
+#         text = element_text(size = 8),
+#         axis.title = element_text(face = "bold",size = 8),
+#         axis.text = element_text(size = 8),
+#   )+
+#   guides(color=guide_legend(nrow=2,byrow=TRUE))
+# 
+# dev.off()
 
 feat = colnames(df[,-1])
 test_ran = data.frame(rDirichlet.acomp(1e4,alpha = 1*rep(1,ncol(df[,-1]))))
@@ -159,10 +162,13 @@ decison_bound = data.frame(Dataset = xx$Dataset,Status = "decision bound",C1 = 1
 
 
 # ## Plot Ternary
+pdf(file = "Figures/fig2_isoporp_RA_ranger.pdf",width = 3 ,height = 3)
 ggtern(test_ran,aes(V1,V2,V3))+
-  geom_point(aes(col = C1),alpha = .5,pch = 15,size = 2)+
+  geom_point(aes(col = C1),alpha = .5,pch = 16,size = 1)+
   theme_classic()+
   scale_color_distiller(palette = "RdBu")
+dev.off()
+
 
 test_ran = test_ran %>% 
   rename(Class1_Probability = C1)
@@ -172,7 +178,7 @@ decison_bound = decison_bound %>%
   rename(Class1_Probability = C1)
 
 col_ = if_else(base$Status=="C1","Purple","yellow")
-tiff(filename = "Figures/figure1a_relabund.tiff",width = 3,height = 3,units = "in",res = 300)
+pdf(file = "Figures/fig2_isoprop_RA_ranger.pdf",width = 3 ,height = 3)
 ggtern(test_ran,aes(V1,V2,V3,col = Class1_Probability,value = Class1_Probability*1000))+
   geom_point(alpha = .5,pch = 15,size = 3)+
   geom_line(data = decison_bound,aes(x = V1,y = V2,z = V3),size = 1,col  ="black")+
@@ -181,9 +187,9 @@ ggtern(test_ran,aes(V1,V2,V3,col = Class1_Probability,value = Class1_Probability
   theme_notitles()+
   scale_color_distiller(palette = "RdBu")+
   scale_fill_distiller(palette = "RdBu")+
-  geom_point(data = base,aes(V1,V2,V3,shape = Dataset),size  = 1.25,alpha = 1,col = col_)+
-  scale_shape_manual(values = c(4,16))+
-  annotate(geom = "text",x = .4,y = .32,z =.18 ,label = "Decision \nBound",angle = 78,size = 2)+
+  geom_point(data = base,aes(V1,V2,V3,shape = Dataset),size  = .75,alpha = .8,col = col_)+
+  scale_shape_manual(values = c(4,1))+
+  annotate(geom = "text",x = .4,y = .32,z =.18 ,label = "Decision Boundary",angle = 78,size = 2)+
   # annotate(geom = "text",x = .75,y = .15,z =.2 ,label = "Test \nDataset",size = 2,angle = 20)+
   # annotate(geom = "text",x = .08,y = .7,z =.22 ,label = "Train \nDataset",size = 2,angle = 20)+
   theme(legend.position = "none",
@@ -205,13 +211,164 @@ dev.off()
 
 
 
+## Train Model Relative Abundance
+## Select Dataset 1
+df = tbl %>% 
+  filter(Dataset == "Train") %>% 
+  select(-Dataset)
+df$Status = factor(df$Status)
+
+## Daatset 2
+df2 = tbl %>% 
+  filter(Dataset == "Test") %>% 
+  select(-Dataset)
+df2$Status = factor(df2$Status)
+
+## Train RF 
+m1 = trainML_Models(trainLRs = df[,-1],testLRs = df2[,-1],
+                    ytrain = df[,1],y_test = df2[,1],models = "pls",
+                    mtry_ = round(sqrt(ncol(df[,-1]))),ntrees = 500,
+                    numFolds = 10,cvMethod = "repeatedcv",numRepeats = 5
+)
+
+## Train Performance
+m1$performance
+## Train Performance
+classes = as.character(unique(df$Status))
+## Train AUC
+preds = m1$models[[1]]$pred
+train_mroc = pROC::multiclass.roc(preds$obs,preds[,classes])
+train.roc = DiCoVarML::rocPlot(train_mroc)
+train.roc$trial = "Train"
+
+## Compute AUC
+roc_ = pROC::roc(df2$Status,m1$predictionMatrix[,2])
+roc_$thresholds
+mroc = pROC::multiclass.roc(df2$Status,m1$predictionMatrix[,1:2])
+roc.df = DiCoVarML::rocPlot(mroc)
+roc.df$trial = "Test"
+
+## Combined ROC
+roc.df = rbind(roc.df,train.roc)
+ccs = distinct(roc.df[,3:4])
+roc.df$trial = factor(roc.df$trial,levels = c("Train","Test"),
+                      label = c(paste0("Train: ",ccs$Comp[ccs$trial=="Train"]),
+                                paste0("Test: ",ccs$Comp[ccs$trial!="Train"])) 
+)
+
+# ## PLot ROC
+# tiff(filename = "Figures/figure1a_relativeAbundance.tiff",width = 2.5,height = 2,units = "in",res = 300)
+# ggplot(roc.df,aes(spec,sens,col = trial,group = trial,lty = trial))+
+#   geom_line(size = .75)+
+#   theme_classic()+
+#   xlab("1-Specificity")+
+#   ylab("Sensitivity")+
+#   ggtitle("RF with Rel. Abundance")+
+#   geom_abline(slope = 1,col = "grey")+
+#   theme(legend.position = "top",
+#         legend.title = element_blank(),plot.title = element_text(hjust = .5,size = 8,face = "bold"),
+#         panel.grid = element_blank(),
+#         axis.line = element_line(size = .5),
+#         legend.text = element_text(size = 6),
+#         legend.key.height = unit(0.1, "cm"),
+#         legend.margin=margin(-5,0,-15,-10),
+#         text = element_text(size = 8),
+#         axis.title = element_text(face = "bold",size = 8),
+#         axis.text = element_text(size = 8),
+#   )+
+#   guides(color=guide_legend(nrow=2,byrow=TRUE))
+# 
+# dev.off()
+
+feat = colnames(df[,-1])
+test_ran = data.frame(rDirichlet.acomp(1e4,alpha = 1*rep(1,ncol(df[,-1]))))
+colnames(test_ran) = colnames(df[,-1])
+testh =m1$models[[1]]
+preds = predict.train(testh,test_ran,type = "prob" )
+preds.null = predict.train(testh,tbl[,feat],type = "prob" )
+test_ran = data.frame(Dataset = "Simulated",Status = "Test",preds ,test_ran)
+base = data.frame(Dataset = tbl$Dataset,Status = tbl$Status,preds.null,tbl[,feat])
+decison_bound = data.frame(Dataset = xx$Dataset,Status = "decision bound",C1 = 1,C2  = 2,xx[,3:5] )
+
+
+# # ## Plot Ternary
+# pdf(file = "Figures/fig2_isoporp.pdf",width = 3 ,height = 3)
+# ggtern(test_ran,aes(V1,V2,V3))+
+#   geom_point(aes(col = C1),alpha = .5,pch = 16,size = 1)+
+#   theme_classic()+
+#   scale_color_distiller(palette = "RdBu")
+# dev.off()
+
+
+test_ran = test_ran %>% 
+  rename(Class1_Probability = C1)
+base = base %>% 
+  rename(Class1_Probability = C1)
+decison_bound = decison_bound %>% 
+  rename(Class1_Probability = C1)
+
+col_ = if_else(base$Status=="C1","Purple","yellow")
+pdf(file = "Figures/fig2_isoprop_RA_pls.pdf",width = 3 ,height = 3)
+ggtern(test_ran,aes(V1,V2,V3,col = Class1_Probability,value = Class1_Probability*1000))+
+  geom_point(alpha = .5,pch = 15,size = 3)+
+  geom_line(data = decison_bound,aes(x = V1,y = V2,z = V3),size = 1,col  ="black")+
+  theme_classic()+
+  theme_nolabels()+
+  theme_notitles()+
+  scale_color_distiller(palette = "RdBu")+
+  scale_fill_distiller(palette = "RdBu")+
+  geom_point(data = base,aes(V1,V2,V3,shape = Dataset),size  = .75,alpha = .8,col = col_)+
+  scale_shape_manual(values = c(4,1))+
+  annotate(geom = "text",x = .4,y = .32,z =.18 ,label = "Decision Boundary",angle = 78,size = 2)+
+  # annotate(geom = "text",x = .75,y = .15,z =.2 ,label = "Test \nDataset",size = 2,angle = 20)+
+  # annotate(geom = "text",x = .08,y = .7,z =.22 ,label = "Train \nDataset",size = 2,angle = 20)+
+  theme(legend.position = "none",
+        #legend.title = element_blank(),
+        panel.grid = element_blank(),
+        axis.line = element_line(size = .5),
+        plot.margin = margin(-1,-1,-1,-1),
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.35, "cm"),
+        legend.margin=margin(-1,1,-1,-1),
+        text = element_text(size = 8),
+        axis.title = element_text(face = "bold",size = 8),
+        axis.text = element_text(size = 8),
+  )  
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Log ratios --------------------------------------------------------------
 
 ### PLR Approach
 plr = calcLogRatio(df)
 plr2 = calcLogRatio(df2)
 m1.plr = trainML_Models(trainLRs = plr[,-1],testLRs = plr2[,-1],
-                        ytrain = plr[,1],y_test = plr2[,1],models = "pls",
+                        ytrain = plr[,1],y_test = plr2[,1],models = "ranger",
                         mtry_ = round(sqrt(ncol(df[,-1]))),ntrees = 500,
                         numFolds = 10,cvMethod = "repeatedcv",numRepeats = 5)
 
@@ -241,29 +398,29 @@ roc.df$trial = factor(roc.df$trial,levels = c("Train","Test"),
                                 paste0("Test: ",ccs$Comp[ccs$trial!="Train"])) 
 )
 
-## PLot ROC
-tiff(filename = "Figures/figure1a_logRatio.tiff",width = 2.5,height = 2,units = "in",res = 300)
-ggplot(roc.df,aes(spec,sens,col = trial,group = trial,lty = trial))+
-  geom_line(size = .75)+
-  theme_classic()+
-  xlab("1-Specificity")+
-  ylab("Sensitivity")+
-  ggtitle("RF with Log Ratios")+
-  geom_abline(slope = 1,col = "grey")+
-  theme(legend.position = "top",
-        legend.title = element_blank(),plot.title = element_text(hjust = .5,size = 8,face = "bold"),
-        panel.grid = element_blank(),
-        axis.line = element_line(size = .5),
-        legend.text = element_text(size = 6),
-        legend.key.height = unit(0.1, "cm"),
-        legend.margin=margin(-5,0,-15,-10),
-        text = element_text(size = 8),
-        axis.title = element_text(face = "bold",size = 8),
-        axis.text = element_text(size = 8),
-  )+
-  guides(color=guide_legend(nrow=2,byrow=TRUE))
-
-dev.off()
+# ## PLot ROC
+# tiff(filename = "Figures/figure1a_logRatio.tiff",width = 2.5,height = 2,units = "in",res = 300)
+# ggplot(roc.df,aes(spec,sens,col = trial,group = trial,lty = trial))+
+#   geom_line(size = .75)+
+#   theme_classic()+
+#   xlab("1-Specificity")+
+#   ylab("Sensitivity")+
+#   ggtitle("RF with Log Ratios")+
+#   geom_abline(slope = 1,col = "grey")+
+#   theme(legend.position = "top",
+#         legend.title = element_blank(),plot.title = element_text(hjust = .5,size = 8,face = "bold"),
+#         panel.grid = element_blank(),
+#         axis.line = element_line(size = .5),
+#         legend.text = element_text(size = 6),
+#         legend.key.height = unit(0.1, "cm"),
+#         legend.margin=margin(-5,0,-15,-10),
+#         text = element_text(size = 8),
+#         axis.title = element_text(face = "bold",size = 8),
+#         axis.text = element_text(size = 8),
+#   )+
+#   guides(color=guide_legend(nrow=2,byrow=TRUE))
+# 
+# dev.off()
 
 test_ran = data.frame(rDirichlet.acomp(1e4,alpha = 1*c(1,1,1)))
 colnames(test_ran) = colnames(df[,-1])
@@ -283,7 +440,8 @@ decison_bound = decison_bound %>%
   rename(C1 = Class1_Probability)
 
 col_ = if_else(base$Status=="C1","Purple","yellow")
-tiff(filename = "Figures/figure1a_logratioTern.tiff",width = 3,height = 3,units = "in",res = 300)
+
+pdf(file = "Figures/fig2_isoprop_logratio_LR_ranger.pdf",width = 3 ,height = 3)
 ggtern(test_ran,aes(V1,V2,V3,col = C1,value = C1*1000))+
   geom_point(alpha = .5,pch = 15,size = 3)+
   geom_line(data = decison_bound,aes(x = V1,y = V2,z = V3),size = 1,col  ="black")+

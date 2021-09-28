@@ -19,6 +19,8 @@
 #' @param lrs.test An optional supplied logratio matrix for test data; must be supplied if dcv scores are pre computed
 #' @param useRidgeWeights should ensemble model first be weighted by ridge regression coefficients?
 #' @param scaledata should train data be scaled (test data scaled based on train)
+#' @param use_rfe should a random forest recursive elimination model be trained 
+#' @param minConnected should the ratio network be minimally connected or threshold with dcv_score>0
 #'
 #' @return
 #' 
@@ -29,10 +31,10 @@ targeted_dcvSelection = function(trainx,
                                  testx,
                                  y_label,
                                  y_test,
-                                 dcv=NULL,lrs.train=NULL,lrs.test = NULL,
+                                 dcv=NULL,lrs.train=NULL,lrs.test = NULL,minConnected = F,
                                  ensemble  = c("ranger","pls","svmRadial","glmnet","rangerE"), tarFeatures = 5,
                                  imp_factor = 1e-7,
-                                 select_randomFeatures = F,
+                                 select_randomFeatures = F,use_rfe = T,
                                  ts.id,seed = 08272008,max_sparsity = .9,useRidgeWeights=T,scaledata = T){
   
   result = data.frame()
@@ -84,16 +86,29 @@ targeted_dcvSelection = function(trainx,
       lrs.train = selEnergyPermR::calcLogRatio(df = data.frame(Status = y_label,train_subcomp))[,-1]
       lrs.test = selEnergyPermR::calcLogRatio(df = data.frame(Status = y_test,test_subcomp))[,-1]
       
-      
       ## recompute dcvSCores
-      cc.dcv = diffCompVarRcpp::dcvScores(logRatioMatrix = data.frame(Status = y_label,lrs.train), 
-                                          includeInfoGain = T, nfolds = 1, numRepeats = 1, 
-                                          rankOrder = T)
-      dcv = cc.dcv$lrs
-      w = min(which(dcv$nDistinct==tarFeatures))
+      if(minConnected){
+        cc.dcv = diffCompVarRcpp::dcvScores(logRatioMatrix = data.frame(Status = y_label,lrs.train),
+                                            includeInfoGain = T, nfolds = 1, numRepeats = 1,
+                                            rankOrder = T)
+        dcv = cc.dcv$lrs
+        w = min(which(dcv$nDistinct==tarFeatures))  
+      }else{
+        cc.dcv = diffCompVarRcpp::dcvScores(logRatioMatrix = data.frame(Status = y_label,lrs.train),
+                                            includeInfoGain = T, nfolds = 1, numRepeats = 1,
+                                            rankOrder = F)
+        dcv = cc.dcv$lrs
+        w = max(which(dcv$rowmean>0))  
+      }
+      
+      
+      
       glm.train = subset(lrs.train,select = dcv$Ratio[1:w])
       glm.test = subset(lrs.test,select = dcv$Ratio[1:w])
       dcv = dcv[1:w,]
+      
+      
+      
     }else{
       cn = colnames(trainx)
       compTime = 0
@@ -235,66 +250,70 @@ targeted_dcvSelection = function(trainx,
     
     
     message("Train RFE Model - (Step 4 of 4)")
+    rfe_Features = NULL
+    if(use_rfe){
+      suppressMessages(suppressWarnings({
+        
+        type = "Dense"
+        ## Feature Selection: rf-RFE 
+        tc = .99
+        c1.cor = cor(glm.train,method = "spearman")
+        c.fc = data.frame(Ratio = caret::findCorrelation(c1.cor,cutoff = tc,names = T))
+        keep =!colnames(glm.train)%in%c.fc$Ratio
+        glm.train = glm.train[,keep]
+        glm.test = glm.test[,keep]
+        
+        compTime2 = system.time({
+          pp = rfeSelection.ByMetric(train_ratio = glm.train,
+                                     test_ratio = glm.test,
+                                     ytrain =y_label,
+                                     ntrees = 750,
+                                     sets = 10,
+                                     impMeasure = "impurity_corrected",
+                                     kfold = 5,
+                                     minPercentFeatReturn = .3)
+        })
+        
+        train_data2 = pp$reducedTrainRatios
+        test_data2 = pp$reducedTestRatio
+        message("number of features = ",ncol(train_data2))
+        
+        ## Train Model
+        ph = trainML_Models(trainLRs = train_data2,
+                            testLRs = test_data2,
+                            ytrain = y_label,
+                            y_test = y_test,
+                            testIDs = ts.id,
+                            models = ensemble) 
+        
+        ## Compute Performance
+        
+        pmat = ph$predictionMatrix
+        pmat = pmat %>% 
+          group_by(ID,Status) %>% 
+          dplyr::select(-model) %>% 
+          summarise_all(.funs = mean)
+        pmat = data.frame(pmat)
+        mroc = pROC::multiclass.roc(pmat$Status,pmat[,classes]);mroc
+        
+        
+        ## Compute Number of Part
+        cn = colnames(train_data2)
+        n_ratios = length(cn)
+        uniqueParts = unique(as.vector(stringr::str_split(cn,"___",2,simplify = T)))
+        n_parts  = dplyr::n_distinct(uniqueParts)
+        
+        ## Save Performance
+        perf = data.frame(Approach = "DCV-rfRFE",AUC = as.numeric(pROC::auc(mroc)),
+                          number_parts = n_parts,number_ratios = ncol(train_data2),
+                          comp_time = compTime[3]+compTime2[3],
+                          base_dims = baseDims)
+        result = rbind(result,perf)
+        prob_matrices[["rfRFE"]] = pmat
+      }))
+      rfe_Features = list(train = train_data2,test =test_data2)
+    }
     
-    suppressMessages(suppressWarnings({
-      
-      type = "Dense"
-      ## Feature Selection: rf-RFE 
-      tc = .99
-      c1.cor = cor(glm.train,method = "spearman")
-      c.fc = data.frame(Ratio = caret::findCorrelation(c1.cor,cutoff = tc,names = T))
-      keep =!colnames(glm.train)%in%c.fc$Ratio
-      glm.train = glm.train[,keep]
-      glm.test = glm.test[,keep]
-      
-      compTime2 = system.time({
-        pp = rfeSelection.ByMetric(train_ratio = glm.train,
-                                   test_ratio = glm.test,
-                                   ytrain =y_label,
-                                   ntrees = 750,
-                                   sets = 10,
-                                   impMeasure = "impurity_corrected",
-                                   kfold = 5,
-                                   minPercentFeatReturn = .3)
-      })
-      
-      train_data2 = pp$reducedTrainRatios
-      test_data2 = pp$reducedTestRatio
-      message("number of features = ",ncol(train_data2))
-      
-      ## Train Model
-      ph = trainML_Models(trainLRs = train_data2,
-                          testLRs = test_data2,
-                          ytrain = y_label,
-                          y_test = y_test,
-                          testIDs = ts.id,
-                          models = ensemble) 
-      
-      ## Compute Performance
-     
-      pmat = ph$predictionMatrix
-      pmat = pmat %>% 
-        group_by(ID,Status) %>% 
-        dplyr::select(-model) %>% 
-        summarise_all(.funs = mean)
-      pmat = data.frame(pmat)
-      mroc = pROC::multiclass.roc(pmat$Status,pmat[,classes]);mroc
-      
-      
-      ## Compute Number of Part
-      cn = colnames(train_data2)
-      n_ratios = length(cn)
-      uniqueParts = unique(as.vector(stringr::str_split(cn,"___",2,simplify = T)))
-      n_parts  = dplyr::n_distinct(uniqueParts)
-      
-      ## Save Performance
-      perf = data.frame(Approach = "DCV-rfRFE",AUC = as.numeric(pROC::auc(mroc)),
-                        number_parts = n_parts,number_ratios = ncol(train_data2),
-                        comp_time = compTime[3]+compTime2[3],
-                        base_dims = baseDims)
-      result = rbind(result,perf)
-      prob_matrices[["rfRFE"]] = pmat
-    }))
     
     
     
@@ -306,7 +325,7 @@ targeted_dcvSelection = function(trainx,
                 ridge_coefficients = c,probMatrices  = prob_matrices,
                 final_dcv = dcv, 
                 ensemble_pmat = pmat,
-                rfe_features = list(train = train_data2,test =test_data2),
+                rfe_features = rfe_Features,
                 ridge_pmat = p ))
     
 

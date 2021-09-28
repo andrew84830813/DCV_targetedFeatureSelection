@@ -20,10 +20,10 @@ fnames = dir("Results/")
  
  
  ## Final Data Sets to include
- nm = "cmg_FengQ-2015_crc"
- nm[2] = "cmg_WirbelJ-2018_crc"
- nm[3] = "cmg_ZellerG_2014_crc"
- nm[4] = "cmg_YuJ_2015_crc"
+ nm = "cmg_QinN-2014_cirr"
+ nm[2] = "cmg_RubelMA-2020_STH"
+ nm[3] = "cmg_ZhuF-2020_schizo"
+ nm[4] = "cmg_ZellerG_2014_crc"
  
  
 
@@ -52,33 +52,62 @@ res.df = data.frame()
 for(d in ds){
   ph = res %>% 
     filter(Dataset==d)
-  ph$col = "black"
+  ph$col = "lightblue"
   i = which.max(ph$AUC)
   ph$col[i] = "red"
   res.df = rbind(res.df,ph)
 }
 res = data.frame(res)
-
-
 results_all$seed_fold = paste0(results_all$Seed,"_",results_all$corrected_fold) 
 
+## Pairwsie comparsion
+cx = list( c("DCV-rfRFE","CLR-LASSO"), c("DCV-rfRFE","Coda-LASSO"),
+           c("DCV-ridgeEnsemble","CLR-LASSO"), c("DCV-ridgeEnsemble","Coda-LASSO"), 
+           c("DCV-ridgeRegression","CLR-LASSO"),c("DCV-ridgeRegression","Coda-LASSO")  )
+
+
+
+res1 = results_all %>%
+  group_by(Dataset) %>%
+  summarise_all(mean) %>% 
+  select(Dataset,AUC)
+colnames(res1)[2] = "y.position"
+dd = results_all %>%
+  dplyr::group_by(Dataset) %>%
+  rstatix::wilcox_test(data =., AUC ~ Approach,paired = T,comparisons =  cx) %>%
+  rstatix::adjust_pvalue(method = "BH") %>%
+  rstatix::add_significance("p.adj") %>%
+  dplyr::arrange(dplyr::desc(-p)) %>% 
+  filter(p.adj<0.05) %>% 
+  left_join(res1)
+
+
 #tiff(filename =paste0(f_name,".tiff"),width = 4.5,height = 5.5,units = "in",res = 300)
-ggplot(results_all,aes(Approach,AUC))+
+pdf(file = "Figures/benchamrk_ExpData.pdf",width = 7 ,height = 4)
+ggplot(results_all,aes(Approach,AUC,shape = Approach))+
   theme_bw()+
-  coord_flip()+
+  #coord_flip()+
   stat_summary(fun.y = mean, geom = "line",size = 1,col = "black",aes(group =1))+
-  stat_summary(fun.data = mean_se,geom = "errorbar",width = .05)+
-  #geom_line(aes(group =seed_fold),col = "gray")+
-  #geom_point(col  ="gray",size = 1)+
-  geom_point(data = res.df,aes(Approach,AUC),col = "black",fill = res.df$col,size = 3,pch = 21)+
-  facet_wrap(.~Dataset,nrow = 1,scales = "free_x")+
+  #stat_summary(fun.data = mean_se,geom = "errorbar",width = .05)+
+  geom_signif(comparisons = cx,tip_length = .05,
+              test = "wilcox.test",hjust = -.5,vjust = -1,textsize = 3,
+              test.args = list(paired = T),y_position = seq(1,1.25,length.out = 6),
+              map_signif_level = function(p) sprintf("p = %.2g", p)
+             )+
+  geom_line(aes(group =seed_fold),col = "gray")+
+  geom_point(col  ="gray",size = 1)+
+  scale_shape_manual(values = 21:26)+
+  geom_point(data = res.df,aes(Approach,AUC),fill = res.df$col,col = "black",size = 4)+
+  facet_wrap(.~Dataset,nrow = 2,
+             scales = "free_y"
+             )+
   theme(legend.position = "top",
         plot.title = element_text(size = 7,hjust = .5,face = "bold"),
         #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
         axis.title = element_text(size = 8),
         axis.title.y = element_blank(),
         #axis.text.y = element_text(size = 7),
-        #axis.text.y = element_blank(),
+        axis.text.x = element_blank(),
         #legend.margin=margin(-1,-1,-1,-1),
         strip.switch.pad.wrap = margin(0,0,0,0),
         legend.margin=margin(-5,-10,-10,-10),
@@ -89,48 +118,5 @@ ggplot(results_all,aes(Approach,AUC))+
         legend.title = element_text(size = 8),
         #legend.background = element_rect(colour = "black")
   )
-
-ggplot(results_all,aes(Approach,number_parts))+
-  theme_bw()+
-  coord_flip()+
-  stat_summary(fun.y = mean, geom = "col",size = 1,col = "black",width = .7)+
-  stat_summary(fun.data = mean_se,geom = "errorbar",width = .15)+
-  facet_wrap(.~Dataset,nrow = 1,scales = "free_x")+
-  theme(legend.position = "top",
-        plot.title = element_text(size = 7,hjust = .5,face = "bold"),
-        #plot.margin = margin(0.5, 0.5, 0.5, 0.5),
-        axis.title = element_text(size = 12),
-        #axis.title.y = element_blank(),
-        #axis.text.y = element_text(size = 7),
-        #axis.text.y = element_blank(),
-        #legend.margin=margin(-1,-1,-1,-1),
-        strip.switch.pad.wrap = margin(0,0,0,0),
-        legend.margin=margin(-5,-10,-10,-10),
-        axis.text = element_text(size = 12),
-        panel.grid = element_blank(),
-        legend.key.size = unit(.15,units = "in"),
-        legend.text = element_text(size = 8),
-        legend.title = element_text(size = 8),
-        #legend.background = element_rect(colour = "black")
-  )
-
-
-
-
-
-
-## Pairwsie comparsion
-cx = list( c("DCV-rfRFE","CLR-LASSO"), c("DCV-rfRFE","Coda-LASSO"),
-           c("DCV-ridgeEnsemble","CLR-LASSO"), c("DCV-ridgeEnsemble","Coda-LASSO"), 
-           c("DCV-ridgeRegression","CLR-LASSO"),c("DCV-ridgeRegression","Coda-LASSO")  )
-
-
-dd = results_all %>%
-  dplyr::group_by(Dataset) %>%
-  rstatix::wilcox_test(data =., AUC ~ Approach,paired = T,comparisons =  cx) %>%
-  rstatix::adjust_pvalue(method = "BH") %>%
-  rstatix::add_significance("p.adj") %>%
-  dplyr::arrange(dplyr::desc(-p))
-
-
+dev.off()
 
